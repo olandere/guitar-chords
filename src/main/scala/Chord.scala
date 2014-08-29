@@ -12,6 +12,8 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
 		}}
 	val tuning = List(0,5,10,3,7,0)
 	
+	type FretList = List[Option[Int]]
+	
 	def intervals:List[String] = {
 		
 		def performAlterations(ints: List[String]) = {
@@ -61,18 +63,18 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
 		}
 	})	
 	
-	def allChords(fretSpan:Int = 6):List[List[Option[Int]]] = {
-		def withinSpan(c:List[Option[Int]]):Boolean = {
+	def allChords(fretSpan:Int = 6):List[FretList] = {
+		def withinSpan(c:FretList):Boolean = {
 			val m = c.filter{_ != None}.map{_.get}
 			scala.math.abs(m.max-m.min) < fretSpan
 		}
 		
-		def adjustOctave(c:List[Option[Int]]) = {
+		def adjustOctave(c:FretList) = {
 			val m = c.filter{_ != None}.map{_.get}
 			if (m.min < 0) c.map{_.map{x:Int=>x+12}} else c
 		}
 		
-		def transpose(c:List[Option[Int]]) = 
+		def transpose(c: FretList) = 
 			c.map{_.map{_ + NOTE_MAP(root)}}
 		
 		
@@ -84,18 +86,26 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
 		}}}.filter(withinSpan).toList.map{c=>adjustOctave(transpose(c))}
 	}
 		
-	def printChords(fretSpan:Int = 6) = {	
-		def adjustOctave(c:List[Option[Int]]):List[Option[Int]] = {
+	def printChords(fretSpan: Int = 6) = {	
+		def adjustOctave(c:FretList):FretList = {
 			val m = c.filter{_ != None}.map{_.get}
 			if (m.min < 0) c.map{_.map{x:Int=>x+12}} else c
 		}
 		
-	  def printChord(c: List[Option[Int]]) = {
+	  def printChord(c: FretList) = {
 		//adjustOctave(c.map{o => o.map{_ + NOTE_MAP(root)}}).map{_.getOrElse("x")}
 		c.map{_.getOrElse("x")}
 	  }	
 	  allChords(fretSpan).map(printChord)
 	}
+	
+	// def diff(c: Chord, fretSpan: Int):Int = {
+	// 		for {
+	// 		  c1 <- allChords(fretSpan)
+	// 		  c2 <- c.allChords(fretSpan)
+	// 		  diff()
+	// 		}
+	// 	}
 }
 
 object Chord {
