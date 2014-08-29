@@ -1,6 +1,10 @@
 //Ideas - handle altered tunings
 //Ideas - handle chord progressions - find nearest chords
 //todo - allow notes to be dropped - e.g. no 5
+package chord
+
+import scalaz._, syntax.show._
+//import chord._
 
 class Chord(val root: String, val triad: String, val quality: String, val extension: Int, val alteration: String, val altRoot: String) {
 	val INT_MAP = Map("1" -> 0, "3" -> 4, "5" -> 7, "6" -> 9, "7" -> 11, "9" -> 2, "11" -> 5, "13" -> 9)
@@ -11,8 +15,6 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
 			1 + NOTE_MAP(r(0).toString)
 		}}
 	val tuning = List(0,5,10,3,7,0)
-	
-	type FretList = List[Option[Int]]
 	
 	def intervals:List[String] = {
 		
@@ -92,23 +94,33 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
 			if (m.min < 0) c.map{_.map{x:Int=>x+12}} else c
 		}
 		
-	  def printChord(c: FretList) = {
-		//adjustOctave(c.map{o => o.map{_ + NOTE_MAP(root)}}).map{_.getOrElse("x")}
-		c.map{_.getOrElse("x")}
-	  }	
-	  allChords(fretSpan).map(printChord)
+	  // def printChord(c: FretList) = {
+	  // 		//adjustOctave(c.map{o => o.map{_ + NOTE_MAP(root)}}).map{_.getOrElse("x")}
+	  // 		c.map{_.getOrElse("x")}
+	  // 	  }	
+	  allChords(fretSpan).map(_.shows)
 	}
 	
-	// def diff(c: Chord, fretSpan: Int):Int = {
-	// 		for {
+//	 def diff(c: Chord, fretSpan: Int):Int = {
+//	 		for {
 	// 		  c1 <- allChords(fretSpan)
 	// 		  c2 <- c.allChords(fretSpan)
 	// 		  diff()
 	// 		}
 	// 	}
+	
+	def diff(a: FretList, b: FretList): Int = {
+		a.zip(b).map{e => if (e._1 == None || e._2 == None) 0 else math.abs(e._1.get - e._2.get)}.foldLeft(0)(_+_)
+	}
 }
 
 object Chord {
+	
+	type FretList = List[Option[Int]]
+
+	implicit val fretListShow: Show[FretList] = Show.shows(
+	  _.map{_.getOrElse("x")}.mkString(" "))
+	
 	val chordMatch = """([ABCDEFG][♯#b♭]?)(m|-|\+|aug|dim)?(M|maj)?(6|7|9|11|13)?(([♯#b♭](5|9))*)(/([ABCDEFG][♯#b♭]?))?""".r
 	
 	def triad(s: String) = {
