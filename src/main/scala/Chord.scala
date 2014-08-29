@@ -67,12 +67,12 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
 			scala.math.abs(m.max-m.min) < fretSpan
 		}
 		
-		def adjustOctave(c:List[Option[Int]]): List[Option[Int]] = {
+		def adjustOctave(c:List[Option[Int]]) = {
 			val m = c.filter{_ != None}.map{_.get}
 			if (m.min < 0) c.map{_.map{x:Int=>x+12}} else c
 		}
 		
-		def transpose(c:List[Option[Int]]): List[Option[Int]] = 
+		def transpose(c:List[Option[Int]]) = 
 			c.map{_.map{_ + NOTE_MAP(root)}}
 		
 		
@@ -81,7 +81,7 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
 				x =>
 		          val d = x - a._2 
 		          if (d< -6) Some(d+12) else if (d >6) Some(d-12) else Some(d)
-		}}}.filter{withinSpan}.map(transpose).map(adjustOctave)
+		}}}.filter(withinSpan).toList.map{c=>adjustOctave(transpose(c))}
 	}
 		
 	def printChords(fretSpan:Int = 6) = {	
