@@ -3,11 +3,15 @@
 //todo - allow notes to be dropped - e.g. no 5
 package chord
 
-import scalaz._, syntax.show._
+import scalaz._, syntax.show._, syntax.order._, scalaz.Ordering._
 //import chord._
 
 class Chord(val root: String, val triad: String, val quality: String, val extension: Int, val alteration: String, val altRoot: String) {
+	import chord.Chord._
+	
 	val INT_MAP = Map("1" -> 0, "3" -> 4, "5" -> 7, "6" -> 9, "7" -> 11, "9" -> 2, "11" -> 5, "13" -> 9)
+	val SEMI_TO_INT = Map(0 -> "R", 1 -> "♭9", 2-> "9", 3 -> "♭3", 4 -> "3", 5 -> "11", 6 -> "♭5", 7 -> "5", 8 -> "♯5", 9 -> "13",
+	                      10 -> "♭7", 11 -> "7")
 	val NOTE_MAP: Map[String, Int] = Map("E" -> 0, "F" -> 1, "G" -> 3, "A" -> 5, "B" -> 7, "C" -> 8, "D" -> 10).withDefault{r => 
 		if (r.endsWith("b")||r.endsWith("♭")) {
 			-1 + NOTE_MAP(r(0).toString)
@@ -85,20 +89,17 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
 				x =>
 		          val d = x - a._2 
 		          if (d< -6) Some(d+12) else if (d >6) Some(d-12) else Some(d)
-		}}}.filter(withinSpan).toList.map{c=>adjustOctave(transpose(c))}
+		}}}.filter(withinSpan).toList.map{c=>adjustOctave(transpose(c))}.sorted(fretListOrder.toScalaOrdering)
 	}
 		
 	def printChords(fretSpan: Int = 6) = {	
-		def adjustOctave(c:FretList):FretList = {
-			val m = c.filter{_ != None}.map{_.get}
-			if (m.min < 0) c.map{_.map{x:Int=>x+12}} else c
-		}
-		
-	  // def printChord(c: FretList) = {
-	  // 		//adjustOctave(c.map{o => o.map{_ + NOTE_MAP(root)}}).map{_.getOrElse("x")}
-	  // 		c.map{_.getOrElse("x")}
-	  // 	  }	
 	  allChords(fretSpan).map(_.shows)
+	}
+	
+	def norm(x:Int) = (x+12) % 12
+	
+	def asDegrees(a: FretList) = {
+		a.zip(tuning).map{case (f,s) => if (f.isDefined) Some(SEMI_TO_INT(norm(f.get + s - NOTE_MAP(root)))) else None}.shows
 	}
 	
 //	 def diff(c: Chord, fretSpan: Int):Int = {
@@ -117,8 +118,24 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
 object Chord {
 	
 	type FretList = List[Option[Int]]
+	type DegreeList = List[Option[String]]
 
 	implicit val fretListShow: Show[FretList] = Show.shows(
+	  _.map{_.getOrElse("x")}.mkString(" "))
+	
+	implicit val fretListOrder: Order[FretList] = Order.order((a, b) => {
+	  def helper(fl1: FretList, fl2: FretList): Ordering = {
+		if (fl1.isEmpty || fl2.isEmpty) EQ
+	    else if (!fl1.head.isDefined) helper(fl1.tail, fl2)
+	    else if (!fl2.head.isDefined) helper(fl1, fl2.tail)
+	    else if (fl1.head.get == fl2.head.get) helper(fl1.tail, fl2.tail)
+	    else if (fl1.head.get < fl2.head.get) LT
+	    else GT
+	  }
+	  helper(a, b)	
+	})
+	
+	implicit val degreeListShow: Show[DegreeList] = Show.shows(
 	  _.map{_.getOrElse("x")}.mkString(" "))
 	
 	val chordMatch = """([ABCDEFG][♯#b♭]?)(m|-|\+|aug|dim)?(M|maj)?(6|7|9|11|13)?(([♯#b♭](5|9))*)(/([ABCDEFG][♯#b♭]?))?""".r
