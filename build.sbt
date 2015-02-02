@@ -4,7 +4,7 @@ organization <<= name
 
 version := "1.0"
 
-scalaVersion := "2.11.2"
+scalaVersion := "2.11.4"
 
 scalacOptions ++= Seq("-deprecation", "-optimise", "-feature")
 
@@ -21,4 +21,5 @@ initialCommands in console := """
     |import scalaz._, syntax.show._, syntax.order._
     |import chord._
     |import chord.Chord._
+    |import Operations._
     |""".stripMargin
