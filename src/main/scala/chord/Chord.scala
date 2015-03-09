@@ -6,14 +6,14 @@ package chord
 import scala.util.Try
 import scalaz._, syntax.show._
 
-class Chord(val root: String, val triad: String, val quality: String, val extension: Int, val alteration: String,
-            val altRoot: Option[String]) {
+class Chord(val name:String, val root: String, val triad: String, val quality: String, val extension: Int,
+            val alteration: String, val added: Option[String], val altRoot: Option[String]) {
 
-  val INT_MAP = Map("1" -> 0, "3" -> 4, "5" -> 7, "6" -> 9, "7" -> 11, "9" -> 2, "11" -> 5, "13" -> 9)
+  def this(c: Chord) = {
+    this(c.name, c.root, c.triad, c.quality, c.extension, c.alteration, c.added, c.altRoot)
+  }
 
-  val tuning = List(0, 5, 10, 3, 7, 0)
-
-//  def extensions = Range(9, extension + 1, 2).toList.map(_.toString)
+  val INT_MAP = Map("1" -> 0, "3" -> 4, "5" -> 7, "6" -> 9, "7" -> 11, "9" -> 2, "11" -> 5, "13" -> 9, "R" -> 0)
 
   def intervals(extensions: => List[String] = Range(9, extension + 1, 2).toList.map(_.toString)): List[String] = {
 
@@ -37,7 +37,7 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
       }
     }
 
-    val ints: List[String] = (List("1") :+ (triad match {
+    val ints: List[String] = (List("R") :+ (triad match {
       case "min" | "dim" | "°" => "♭3"
       case _ => "3"
     }) :+ (triad match {
@@ -61,15 +61,13 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
                                }
                              }) ++ (if (extension > 7 && quality != "add") {
       extensions
-    } else if (extension > 7 && quality == "add") {
-      List(extension.toString)
     } else {
       Nil
-  })
+  }) ++ added.map(a=>List(a)).getOrElse(Nil)
     performAlterations(ints)
   }
 
-  def semitones: List[Int] = intervals().map(INT_MAP.withDefault { i =>
+  lazy val semitones: List[Int] = intervals().map(INT_MAP.withDefault { i =>
     if (i.startsWith("b") || i.startsWith("♭")) {
       -1 + INT_MAP(i(1).toString)
     } else if (i.startsWith("°")) {
@@ -126,9 +124,14 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
 //    allChords(fretSpan).map(_.shows)
 //  }
 
-  def asDegrees(a: FretList) = {
-    a.zip(tuning).map { case (f, s) => f.flatMap { n => Some(SEMI_TO_INT(norm(n + s - NOTE_MAP(root))))}
-                      }.shows
+  def asSemi(a: FretList)(implicit tuning: Tuning) = {
+    a.zip(tuning.semitones).map { case (f, s) => f.map { n => norm(n + s - retune(tuning)(root))}}
+  }
+
+  def asDegrees(a: FretList)(implicit tuning: Tuning) = {
+    val mapping = SEMI_TO_INT ++ semitones.zip(intervals()).toMap
+    a.zip(tuning.semitones).map { case (f, s) => f.map { n => mapping(norm(n + s - retune(tuning)(root)))}
+                      }
   }
 
   //	 def diff(c: Chord, fretSpan: Int):Int = {
@@ -138,27 +141,93 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
   // 		  diff()
   // 		}
   // 	}
-  def diff(a: FretList, b: FretList): Int = {
-    a.zip(b).map { e => if (e._1 == None || e._2 == None) {
-      0
-    } else {
-      math.abs(e._1.get - e._2.get)
-    }
-                 }.foldLeft(0)(_ + _)
-  }
 
   def asShell = new ShellChord(this)
+
+  def filterFingerings(fingerings: List[FretList]): List[FretList] = {
+    fingerings
+  }
 }
 
-object InvalidChord extends Chord("A", "", "", 0, "", None) {
-  override def semitones = Nil
+object InvalidChord extends Chord("", "", "", "", 0, "", None, None) {
+  override lazy val semitones = Nil
   override def intervals(extensions: => List[String]) = Nil
+}
+
+class PowerChord(val n:String, val r: String) extends Chord(n, r, "", "", 0, "", None, None) {
+
+  override lazy val semitones: List[Int] = List(0, 7, 0)
+
+  override def intervals(extensions: => List[String] = Nil) = List("R", "5", "R")
+}
+
+trait RootPosition {
+  this: Chord =>
+  override def filterFingerings(fingerings: List[FretList]): List[FretList] = {
+    def isInRootPos(f: FretList) = {
+      asDegrees(f).dropWhile(_.isEmpty).head.get == "R"
+    }
+    fingerings filter isInRootPos
+  }
+}
+
+trait Drop2 {
+  this: Chord =>
+  override def filterFingerings(fingerings: List[FretList]): List[FretList] = {
+    def isDrop2(frets: FretList) = {
+      def consecutiveStrings =
+        frets match {
+          case List(None, None, _, _, _, _) => true
+          case List(None, _, _, _, _, None) => true
+          case List(_, _, _, _, None, None) => true
+          case _ => false
+        }
+      def drop2Voicing = {
+        val r::t::f::s::Nil = semitones
+        asSemi(frets).filter(_.isDefined).map(_.get) match {
+          case List(a, b, c, d) =>
+            val d1 = math.abs(a - b)
+            val d2 = math.abs(c - d)
+            d1 == math.abs(r - f) || d2 == math.abs(r - f)
+        }
+      }
+      consecutiveStrings && drop2Voicing
+    }
+    fingerings filter isDrop2
+  }
+}
+
+trait Drop2and4 {
+  this: Chord =>
+  override def filterFingerings(fingerings: List[FretList]): List[FretList] = {
+    def isDrop2and4(frets: FretList) = {
+      def skipStrings =
+        frets match {
+          case List(None, _, _, None, _, _) => true
+          case List(_, _,  None, _, _, None) => true
+          case _ => false
+        }
+      def drop2Voicing = {
+        val r::t::f::s::Nil = semitones
+        asSemi(frets).filter(_.isDefined).map(_.get) match {
+          case List(a, b, c, d) =>
+            val d1 = math.abs(a - b)
+            val d2 = math.abs(c - d)
+            d1 == math.abs(r - f) || d2 == math.abs(r - f)
+        }
+      }
+      skipStrings && drop2Voicing
+    }
+    fingerings filter isDrop2and4
+  }
 }
 
 object Chord {
 
-  val chordMatch = """([ABCDEFG][♯#b♭]?)(m|-|\+|aug|dim|°)?(M|maj|add)?(6|7|9|11|13)?(([♯#b♭](5|9|11))*)(/([ABCDEFG][♯#b♭]?))?"""
+  val chordMatch = """([ABCDEFG][♯#b♭]?)(m|-|\+|aug|dim|°)?(M|maj)?(6|7|9|11|13)?(([♯#b♭](5|9|11))*)(add(9|11|13))?(/([ABCDEFG][♯#b♭]?))?"""
                    .r
+
+  val powerChordMatch = """([ABCDEFG][♯#b♭]?)5""".r
 
   def triad(s: String) = {
     s match {
@@ -183,13 +252,16 @@ object Chord {
 
   def apply(s: String) = {
     Try {
-          val chordMatch(root, t, qual, ext, alt, _, _, _, altRoot) = s
-          new Chord(root, triad(t), seventh(t, qual), Option(ext).getOrElse("0").toInt, Option(alt).getOrElse(""),
-                    Option(altRoot))
-        }.getOrElse(InvalidChord)
+          val chordMatch(root, t, qual, ext, alt, _, _, _, added, _, altRoot) = s
+          new Chord(s, root, triad(t), seventh(t, qual), Option(ext).getOrElse("0").toInt, Option(alt).getOrElse(""),
+                    Option(added), Option(altRoot))
+        }.getOrElse(Try {
+          val powerChordMatch(root) = s
+          new PowerChord(s, root)
+        }.getOrElse(InvalidChord))
   }
 
   def unapply(s: String) = {
-    s.split(" ").toList.map(c => c match {case "x" => None; case _ => Some(c.toInt)})
+    delimitedToList(s).map(c => c match {case "x" => None; case _ => Some(c.toInt)})
   }
 }
