@@ -7,10 +7,10 @@ import scala.util.Try
 import scalaz._, syntax.show._
 
 class Chord(val name:String, val root: String, val triad: String, val quality: String, val extension: Int,
-            val alteration: String, val added: Option[String], val altRoot: Option[String]) {
+            val alteration: String, val added: Option[String], val suspension: Option[String], val altRoot: Option[String]) {
 
   def this(c: Chord) = {
-    this(c.name, c.root, c.triad, c.quality, c.extension, c.alteration, c.added, c.altRoot)
+    this(c.name, c.root, c.triad, c.quality, c.extension, c.alteration, c.added, c.suspension, c.altRoot)
   }
 
   val INT_MAP = Map("1" -> 0, "3" -> 4, "5" -> 7, "6" -> 9, "7" -> 11, "9" -> 2, "11" -> 5, "13" -> 9, "R" -> 0)
@@ -34,6 +34,19 @@ class Chord(val name:String, val root: String, val triad: String, val quality: S
       } else {
         val altMatch = """([#b♯♭](5|9|11))""".r
         substitute(ints, altMatch.findAllIn(alteration).toList)
+      }
+    }
+
+    def performSuspensions(ints: List[String]) = {
+      if (suspension.isEmpty) {
+        ints
+      } else {
+        ints.map { case "3" | "♭3" => suspension.map {
+                                                       case "2" => "9"
+                                                       case _ => "11"
+                                                     }.get
+                   case x => x
+                 }
       }
     }
 
@@ -64,7 +77,7 @@ class Chord(val name:String, val root: String, val triad: String, val quality: S
     } else {
       Nil
   }) ++ added.map(a=>List(a)).getOrElse(Nil)
-    performAlterations(ints)
+    performSuspensions(performAlterations(ints))
   }
 
   lazy val semitones: List[Int] = intervals().map(INT_MAP.withDefault { i =>
@@ -149,12 +162,12 @@ class Chord(val name:String, val root: String, val triad: String, val quality: S
   }
 }
 
-object InvalidChord extends Chord("", "", "", "", 0, "", None, None) {
+object InvalidChord extends Chord("", "", "", "", 0, "", None, None, None) {
   override lazy val semitones = Nil
   override def intervals(extensions: => List[String]) = Nil
 }
 
-class PowerChord(val n:String, val r: String) extends Chord(n, r, "", "", 0, "", None, None) {
+class PowerChord(val n:String, val r: String) extends Chord(n, r, "", "", 0, "", None, None, None) {
 
   override lazy val semitones: List[Int] = List(0, 7, 0)
 
@@ -224,7 +237,7 @@ trait Drop2and4 {
 
 object Chord {
 
-  val chordMatch = """([ABCDEFG][♯#b♭]?)(m|-|\+|aug|dim|°)?(M|maj)?(6|7|9|11|13)?(([♯#b♭](5|9|11))*)(add(9|11|13))?(/([ABCDEFG][♯#b♭]?))?"""
+  val chordMatch = """([ABCDEFG][♯#b♭]?)(m|-|\+|aug|dim|°)?(M|maj)?(6|7|9|11|13)?(([♯#b♭](5|9|11))*)(add(9|11|13))?(sus(2|4))?(/([ABCDEFG][♯#b♭]?))?"""
                    .r
 
   val powerChordMatch = """([ABCDEFG][♯#b♭]?)5""".r
@@ -252,9 +265,9 @@ object Chord {
 
   def apply(s: String) = {
     Try {
-          val chordMatch(root, t, qual, ext, alt, _, _, _, added, _, altRoot) = s
+          val chordMatch(root, t, qual, ext, alt, _, _, _, added, _, suspension, _, altRoot) = s
           new Chord(s, root, triad(t), seventh(t, qual), Option(ext).getOrElse("0").toInt, Option(alt).getOrElse(""),
-                    Option(added), Option(altRoot))
+                    Option(added), Option(suspension), Option(altRoot))
         }.getOrElse(Try {
           val powerChordMatch(root) = s
           new PowerChord(s, root)
