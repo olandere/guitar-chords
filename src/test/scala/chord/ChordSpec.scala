@@ -1,6 +1,7 @@
 package chord
 
 import org.scalatest._
+import scalaz._, syntax.show._
 
 /**
  * Created by eolander on 1/4/15.
@@ -26,4 +27,75 @@ class ChordSpec extends FlatSpec with ShouldMatchers {
     assert(Chord("AM13").asShell.semitones == List(0,4,11,9))
   }
 
+  it should "have the correct degrees" in {
+    val C6 = Chord("C6")
+    val fingering = Chord.unapply("x 3 2 2 x 3")
+    assert(!C6.asDegrees(fingering).shows.split(" ").contains("13"))
+    assert(C6.asDegrees(fingering).shows.split(" ").contains("R"))
+  }
+
+  it should "have the correct degrees with altered tuning" in {
+    implicit val tuning = Tuning("D G B D")
+    val G = Chord("G")
+    val fingering = Chord.unapply("x 0 0 0")
+    assert(!G.asDegrees(fingering).shows.split(" ").contains("13"))
+    assert(G.asDegrees(fingering).shows.split(" ").contains("R"))
+  }
+
+  it should "handle slash chords" in {
+    implicit val tuning = Tuning.StandardTuning
+    val chord = Chord("A/F")
+    val fingering = Chord.unapply("1 x 2 0 1 x")
+    chord.asDegrees(fingering).shows
+  }
+
+  it should "handle power chords" in {
+    implicit val tuning = Tuning.StandardTuning
+    val G5 = Chord("G5")
+    assert(G5.semitones == List(0,7,0))
+    val fingering = Chord.unapply("3 5 5 x x x")
+    assert(G5.asDegrees(fingering).shows == "R 5 R x x x")
+  }
+
+  it should "handle add9 chords" in {
+    assert(Chord("Gadd9").semitones == List(0, 4, 7, 2))
+    assert(Chord("G6add9").semitones == List(0, 4, 7, 9, 2))
+    assert(Chord("Gm6add9").semitones == List(0, 3, 7, 9, 2))
+    assert(Chord("Gadd9").asShell.semitones == List(0, 4, 2))
+  }
+
+  it should "handle add11 chords" in {
+    assert(Chord("Gadd11").semitones == List(0, 4, 7, 5))
+    assert(Chord("G6add11").semitones == List(0, 4, 7, 9, 5))
+    assert(Chord("Gm6add11").semitones == List(0, 3, 7, 9, 5))
+    assert(Chord("Gadd11").asShell.semitones == List(0, 4, 5))
+  }
+
+  it should "handle banjo chords" in {
+    implicit val tuning = Tuning("D G B D")
+    val c = Chord("C")
+    assert(c.semitones == List(0,4,7))
+    val fingering = Chord.unapply("2 0 1 x")
+    assert(c.asDegrees(fingering).shows == "3 5 R x")
+  }
+
+  it should "handle frettings" in {
+    implicit val tuning = Tuning.StandardTuning
+    Chord.unapply(" 1 x 2 0 1 x")
+    Chord.unapply("1  x 2 0 1 x")
+    Chord.unapply("1 x 2 0 1 x ")
+  }
+
+  it should "compute diffs" in {
+    implicit val tuning = Tuning.StandardTuning
+    val em = Chord.unapply("0 x 0 0 x 7")
+    val c7 = Chord.unapply("0 3 x 0 0 x")
+    val c = diff(em, c7)
+    println(c)
+  }
+
+  it should "handle suspensions" in {
+    assert(Chord("Asus4").semitones == List(0, 5, 7))
+    assert(Chord("Asus2").semitones == List(0, 2, 7))
+  }
 }
