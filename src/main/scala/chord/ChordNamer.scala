@@ -1,7 +1,5 @@
 package chord
 
-import chord._
-
 /**
  * Created by eolander on 2/17/15.
  */
@@ -91,7 +89,10 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning)  {
   }
 
   def determineInversion = {
-
+    if (isDiminishedSeventh) {
+      println("Is dim7")
+      "root" //otherwise a diminished looks like 1st inversion
+     } else {
     fretListToIntList(intervals.distinct).sorted map SEMI_TO_DEGREE match {
       case List(0, 3, 5) | List(0, 3, 5, 7) => "root" // case classes???
       case List(0, 3, 6) | List(0, 3, 5, 6) => "1st"
@@ -102,7 +103,7 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning)  {
 //      case List(0, 4, 8) => "aug"
 
       case _ => "unknown"
-    }
+    }}
   }
 
   def respell = {
@@ -140,7 +141,8 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning)  {
   }
 
   override def toString = {
-    reverseNoteMap(tuning)(root) + quality + intervalNumber + alterations + suspension
+   // val preferSharps = Set("G", "D", "A", "E", "B").contains(root) || root.contains("♯")
+    reverseNoteMap(tuning.root)(root) + quality + intervalNumber + alterations + suspension
   }
 }
 
