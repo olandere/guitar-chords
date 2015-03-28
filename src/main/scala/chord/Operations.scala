@@ -160,4 +160,16 @@ object Operations {
 //      //fingerings(c2, fretSpan).map{f => (f, c1.diff(f1, f))}.sortBy{_._2}.map{_._1}.take(1)
 //    } yield (f1, f2)
   }
+
+  def fingering(scale: Scale)(implicit tuning: Tuning) = {
+    for {
+     root <- tuning.toString.split(" ")
+     frets = (scale.intervals ++ scale.intervals.map(_+12)).map {_ + retune(root)(scale.root)}
+    }
+    yield (frets ++ frets.map(_ % 12)).sorted.distinct.filter(_ < 16)
+  }
+
+  def possibleScales(chord: Chord)(implicit tuning: Tuning) = {
+    Scale.allScales(chord.root).filter(_.containsChord(chord))
+  }
 }

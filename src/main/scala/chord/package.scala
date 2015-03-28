@@ -39,8 +39,9 @@ package object chord {
     }
   }
 
-  private def revMapAccidentals(note: Int, map: Map[Int, String]) = {
-    map(note-1) + "♯"
+  private def revMapAccidentals(note: Int, map: Map[Int, String], preferSharps: Boolean = true) = {
+    if (preferSharps)
+    map(norm(note-1)) + "♯" else map(norm(note+1)) + "♭"
   }
 
   val NOTE_MAP: Map[String, Int] =
@@ -61,9 +62,17 @@ package object chord {
                        }
   }
 
-  def reverseNoteMap(tuning: Tuning) = {
-    val map = retune(tuning).map{case(k, v) => (v -> k)}
-    map.withDefault(n=>revMapAccidentals(n, map))
+  def retune(root: String) = {
+    val newmap = NOTE_MAP.map { e => (e._1, norm(e._2 - NOTE_MAP(root)))}
+    newmap.withDefault { r =>
+      mapAccidentals(r, newmap)
+
+                       }
+  }
+
+  def reverseNoteMap(root: String, preferSharps: Boolean = true) = {
+    val map = retune(root).map{case(k, v) => v -> k }
+    map.withDefault(n=>revMapAccidentals(n, map, preferSharps))
   }
 
   def norm(x: Int) = (x + 12) % 12
@@ -85,9 +94,6 @@ package object chord {
         case (Some(0), Some(_)) => 1
         case _ =>
           math.abs(e._1.get - e._2.get)
-      }
-
-                 }.foldLeft(0)(_ + _) + shift
-
+      }}.sum + shift
   }
 }

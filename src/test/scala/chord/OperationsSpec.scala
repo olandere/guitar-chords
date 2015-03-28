@@ -81,7 +81,7 @@ class OperationsSpec extends FlatSpec with ShouldMatchers {
     val voicing3to6 = Set("3 3 2 3 x x", "6 7 5 5 x x", "8 10 8 9 x x", "12 13 10 12 x x")
     val voicing2to5 = Set("x 10 10 9 11 x", "x 1 2 0 1 x", "x 3 5 3 5 x", "x 7 8 5 8 x")
     val voicing1to4 = Set("x x 5 5 5 6", "x x 8 9 8 8", "x x 10 12 11 12", "x x 2 3 1 3")
-    assert(fingerings(c7, 4).map{_.shows}.toSet.intersect(voicing3to6) == voicing3to6)
+    fingerings(c7, 4).map{_.shows}.toSet.intersect(voicing3to6) should be (voicing3to6)
     assert(fingerings(c7, 4).map{_.shows}.toSet.intersect(voicing2to5) == voicing2to5)
     assert(fingerings(c7, 4).map{_.shows}.toSet.intersect(voicing1to4) == voicing1to4)
   }
@@ -95,5 +95,46 @@ class OperationsSpec extends FlatSpec with ShouldMatchers {
     val c7 = new Chord(Chord("C7")) with Drop2and4
     assert(fingerings(c7, 4).size == 8)
     fingerings(c7, 4).foreach{c=>println(c.shows)}
+  }
+
+  it should "handle modes" in {
+    val EmajScale = MajorScale("E")
+    val AmajScale = MajorScale("A")
+    val FsDorian = Dorian("F#")
+    val GsPhrygian = Phrygian("G#")
+    val ALydian = Lydian("A")
+    val BMixolydian = Mixolydian("B")
+    val CsAeolian = Aeolian("C#")
+    val DsLocrian = Locrian("D#")
+    fingering(EmajScale) should be(
+      Array(List(0, 2, 4, 5, 7, 9, 11, 12, 14), List(0, 2, 4, 6, 7, 9, 11, 12, 14),
+            List(1, 2, 4, 6, 7, 9, 11, 13, 14), List(1, 2, 4, 6, 8, 9, 11, 13, 14),
+            List(0, 2, 4, 5, 7, 9, 10, 12, 14), List(0, 2, 4, 5, 7, 9, 11, 12, 14)))
+
+    fingering(AmajScale) should be(
+      Array(List(0, 2, 4, 5, 7, 9, 10, 12, 14), List(0, 2, 4, 5, 7, 9, 11, 12, 14),
+            List(0, 2, 4, 6, 7, 9, 11, 12, 14), List(1, 2, 4, 6, 7, 9, 11, 13, 14),
+            List(0, 2, 3, 5, 7, 9, 10, 12, 14, 15), List(0, 2, 4, 5, 7, 9, 10, 12, 14)))
+
+    fingering(FsDorian).head should be(fingering(EmajScale).head)
+    fingering(GsPhrygian).head should be(fingering(EmajScale).head)
+    fingering(ALydian).head should be(fingering(EmajScale).head)
+    fingering(BMixolydian).head should be(fingering(EmajScale).head)
+    fingering(CsAeolian).head should be(fingering(EmajScale).head)
+    fingering(DsLocrian).head should be(fingering(EmajScale).head)
+
+    assert (EmajScale.containsChord(Chord("EM7")))
+    assert(!EmajScale.containsChord(Chord("Em7")))
+    assert(!EmajScale.containsChord(Chord("A7")))
+    assert(EmajScale.containsChord(Chord("AM7")))
+    assert(EmajScale.containsChord(Chord("B7")))
+    assert(ALydian.containsChord(Chord("EM7")))
+    assert(FsDorian.containsChord(Chord("B7")))
+  }
+
+  it should "find possible scales" in {
+    possibleScales(Chord("E7b9")).foreach(s => println(s"$s, ${s.relatedScale}"))
+    possibleScales(Chord("G♯m7")).foreach(s => println(s"$s, ${s.relatedScale}"))
+    possibleScales(Chord("Abm7")).foreach(s => println(s"$s, ${s.relatedScale}"))
   }
 }

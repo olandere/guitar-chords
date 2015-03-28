@@ -19,7 +19,7 @@ class Chord(val name:String, val root: String, val triad: String, val quality: S
 
     def performAlterations(ints: List[String]) = {
       def substitute(ints: List[String], alts: List[String]): List[String] = {
-        println(s"ints: ${ints}, alts: ${alts}")
+        println(s"ints: $ints, alts: $alts")
         if (alts.isEmpty) {ints} else if (ints.isEmpty) {alts} else {
           if (alts.head.endsWith(ints.head)) {
             alts.head :: substitute(ints.tail, alts.tail)
@@ -142,7 +142,7 @@ class Chord(val name:String, val root: String, val triad: String, val quality: S
   }
 
   def asDegrees(a: FretList)(implicit tuning: Tuning) = {
-    val mapping = SEMI_TO_INT ++ semitones.zip(intervals()).toMap
+    val mapping = SEMI_TO_INT ++ semitones.zip(intervals()).toMap ++ (if (suspension.isDefined) Map(2 -> "2", 5 -> "4") else Map.empty)
     a.zip(tuning.semitones).map { case (f, s) => f.map { n => mapping(norm(n + s - retune(tuning)(root)))}
                       }
   }
