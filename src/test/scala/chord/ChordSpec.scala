@@ -81,9 +81,11 @@ class ChordSpec extends FlatSpec with ShouldMatchers {
 
   it should "handle frettings" in {
     implicit val tuning = Tuning.StandardTuning
-    Chord.unapply(" 1 x 2 0 1 x")
-    Chord.unapply("1  x 2 0 1 x")
-    Chord.unapply("1 x 2 0 1 x ")
+    val result = List(Some(1), None, Some(2), Some(0), Some(1), None)
+    assert(Chord.unapply(" 1 x 2 0 1 x") == result)
+    assert(Chord.unapply("1  x 2 0 1 x") == result)
+    assert(Chord.unapply("1 x 2 0 1 x ") == result)
+    assert(Chord.unapply("1x201x") == result)
   }
 
   it should "compute diffs" in {
