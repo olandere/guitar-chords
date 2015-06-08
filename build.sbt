@@ -10,7 +10,9 @@ scalacOptions ++= Seq("-deprecation", "-optimise", "-feature")
 
 libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "2.2.1" % "test",
-    "org.scalaz" %% "scalaz-core" % "7.1.0"
+    "org.scalaz" %% "scalaz-core" % "7.1.0",
+    "org.scalacheck" %% "scalacheck" % "1.12.2" % "test",
+    "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
 )
 
 publishMavenStyle := true

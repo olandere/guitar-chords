@@ -13,9 +13,16 @@ class Chord(val name:String, val root: String, val triad: String, val quality: S
     this(c.name, c.root, c.triad, c.quality, c.extension, c.alteration, c.added, c.suspension, c.altRoot)
   }
 
+  def isValid = true
+
   val INT_MAP = Map("1" -> 0, "3" -> 4, "5" -> 7, "6" -> 9, "7" -> 11, "9" -> 2, "11" -> 5, "13" -> 9, "R" -> 0)
 
-  def intervals(extensions: => List[String] = Range(9, extension + 1, 2).toList.map(_.toString)): List[String] = {
+  def altRootInterval =
+    if (altRoot.isDefined)
+      Some(norm(NOTE_MAP(altRoot.get) - NOTE_MAP(root)))
+      else None
+
+    def intervals(extensions: => List[String] = Range(9, extension + 1, 2).toList.map(_.toString)): List[String] = {
 
     def performAlterations(ints: List[String]) = {
       def substitute(ints: List[String], alts: List[String]): List[String] = {
@@ -142,6 +149,7 @@ class Chord(val name:String, val root: String, val triad: String, val quality: S
   }
 
   def asDegrees(a: FretList)(implicit tuning: Tuning) = {
+    println(s"asDegrees($a) tuning: $tuning")
     val mapping = SEMI_TO_INT ++ semitones.zip(intervals()).toMap ++ (if (suspension.isDefined) Map(2 -> "2", 5 -> "4") else Map.empty)
     a.zip(tuning.semitones).map { case (f, s) => f.map { n => mapping(norm(n + s - retune(tuning)(root)))}
                       }
@@ -160,11 +168,17 @@ class Chord(val name:String, val root: String, val triad: String, val quality: S
   def filterFingerings(fingerings: List[FretList]): List[FretList] = {
     fingerings
   }
+
+  override def toString() = {
+    root + (if (extension > 0) extension.toString else "") + alteration +
+    altRoot.map(r => s"/$r").getOrElse("")
+  }
 }
 
 object InvalidChord extends Chord("", "", "", "", 0, "", None, None, None) {
   override lazy val semitones = Nil
   override def intervals(extensions: => List[String]) = Nil
+  override def isValid = false
 }
 
 class PowerChord(val n:String, val r: String) extends Chord(n, r, "", "", 0, "", None, None, None) {
@@ -251,6 +265,15 @@ object Chord {
     }
   }
 
+  def triad(s: Option[String]):String = {
+    s.map {
+      case "m" | "-" => "min"
+      case "aug" | "dim" | "°" => s.get
+      case "+" => "aug"
+      case _ => "maj"
+    }.getOrElse("maj")
+  }
+
   def seventh(t: String, s: String) = {
     t match {
       case "dim" | "°" => t
@@ -260,6 +283,18 @@ object Chord {
           case "add" => "add"
           case _ => "dom"
         }
+    }
+  }
+
+  def seventh(t: Option[String], s: Option[String]):String = {
+    t.flatMap {
+      case "dim" | "°" => t
+      case _ => None}.getOrElse {
+        s.map {
+          case "M" | "maj" => "maj"
+          case "add" => "add"
+          case _ => "dom"
+        }.getOrElse("dom")
     }
   }
 
@@ -274,7 +309,15 @@ object Chord {
         }.getOrElse(InvalidChord))
   }
 
-  def unapply(s: String) = {
-    delimitedToList(s).map(c => c match {case "x" => None; case _ => Some(c.toInt)})
+  def apply(r: String, t: Option[String], e:Option[String],q:Option[String],al:List[String],ad:Option[String],sus:Option[String],ar:Option[String]): Chord ={
+    new Chord(r, r, triad(t), seventh(t, q), e.getOrElse("0").toInt, al.mkString(""),
+              ad,sus,ar)
+  }
+
+  def unapply(s: String)(implicit tuning: Tuning) = {
+    (if (s.trim.length == tuning.numStrings) {
+      s.trim.toList.map{_.toString}
+    } else delimitedToList(s))
+    .map{case "x" => None; case c => Some(c.toInt)}
   }
 }

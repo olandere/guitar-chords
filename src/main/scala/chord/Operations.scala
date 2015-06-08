@@ -8,18 +8,11 @@ import chord._
 object Operations {
 
   def generatePermutations(chord: Chord)(implicit tuning: Tuning) = {
-    if (chord.altRoot.isDefined) {
-      val altInt = Some(norm(NOTE_MAP(chord.altRoot.get)-NOTE_MAP(chord.root)))
-      chord.semitones
-      .map {Some(_)}
-      .padTo(tuning.numStrings - 1, None)
-      .permutations.map{x => altInt :: x}
+    (if (chord.altRoot.isDefined && !chord.semitones.contains(chord.altRootInterval.get)) {
+      chord.semitones ++ chord.altRootInterval.toList
     } else {
       chord.semitones
-      .map {Some(_)}
-      .padTo(tuning.numStrings, None)
-      .permutations
-    }
+    }).map {Some(_)}.padTo(tuning.numStrings, None).permutations
   }
 
   private def withinSpan(fretSpan: Int)(c: FretList): Boolean = {
@@ -60,6 +53,12 @@ object Operations {
 
     def transpose(c: FretList) = c.map {_.map {_ + retune(tuning)(chord.root)}}
 
+    def alteredRoot(c: FretList) = {
+      if (chord.altRootInterval.isDefined) {
+        c.dropWhile(_.isEmpty).head == chord.altRootInterval
+      } else true
+    }
+
     def rootPosition(c: FretList): Boolean =
       if (c.isEmpty) false else
       if (c.head.isDefined) {
@@ -76,7 +75,7 @@ object Operations {
 //    .permutations  //.filter(rootPosition)
    // generatePermutations.foreach(c => println(c))
     chord.filterFingerings(
-    generatePermutations(chord)
+    generatePermutations(chord).filter(alteredRoot)
     .map(_.zip(tuning.semitones)).map {_.map { a: Tuple2[Option[Int], Int] => a._1.map { x => norm(x - a._2) }}}
     .toList
     .map { c => adjustOctave(transpose(c))}.filter(withinSpan(fretSpan))
