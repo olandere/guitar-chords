@@ -17,19 +17,23 @@ trait ChordParser extends RegexParsers {
   val quality: Parser[String] = """M|maj""".r ^^ {_.toString}
   val ext : Parser[String] = """6|7|9|11|13""".r ^^ {_.toString}
   val alteration:Parser[String] = """[♯#b♭](5|9|11)""".r ^^ {_.toString}
-  val addedNote :Parser[String] = "add" ~> """9|11|13""".r ^^ {_.toString}
+  val addedNote :Parser[String] = """add|/""".r ~> """[♯#b♭]?9|11|13""".r ^^ {_.toString}
   val suspension: Parser[String] = "sus" ~> """2|4""".r ^^ {_.toString}
   val altRoot : Parser[String] = """/[ABCDEFG][♯#b♭]?""".r ^^ {_.toString.tail}
 
-  val sep:Parser[String] = """,|\s*""".r
+  val sep:Parser[String] = """,|;|:|\s*""".r
 
   val operation = """""".r ^^ {_.toString}
 
-  val chord: Parser[Chord] = root ~ triad.? ~ quality.? ~ ext.? ~ alteration.* ~ addedNote.? ~ suspension.? ~ altRoot.? ^^ {
-    case r~t~q~e~al~ad~sus~ar => Chord(r, t, e, q, al, ad, sus, ar)
+  val chord: Parser[Chord] = root ~ triad.? ~ quality.? ~ ext.? ~ addedNote.? ~ alteration.* ~ suspension.? ~ altRoot.? ^^ {
+    case r~t~q~e~ad~al~sus~ar => Chord(r, t, e, q, al, ad, sus, ar)
   }
 
-  val chordList = repsep(chord, sep)
+  val powerChord: Parser[Chord] = root <~ "5" ^^ {
+    case r => new PowerChord(r)
+  }
+
+  val chordList = repsep(powerChord | chord, sep)
 
 }
 

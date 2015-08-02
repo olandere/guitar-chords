@@ -1,6 +1,6 @@
 package chord
 
-import chord._
+import scala.annotation.tailrec
 
 /**
  * Created by eolander on 12/25/14.
@@ -16,7 +16,7 @@ object Operations {
   }
 
   private def withinSpan(fretSpan: Int)(c: FretList): Boolean = {
-    val m = c.filter {_ != None}.map {_.get}.filter{_>0}
+    val m = c.filter {_.isDefined}.map {_.get}.filter{_>0}
     if (m.isEmpty) {
       false
     } else {
@@ -24,34 +24,71 @@ object Operations {
     }
   }
 
-  def fingerings(chord: Chord, fretSpan: Int = 6)(implicit tuning: Tuning): List[FretList] = {
-
-    def adjustOctave(c: FretList) = {
-      val m = c.filter {_ != None}.map {_.get}
-      val r = if (m.min < 0) {
-        c.map {_.map { x: Int => x + 12}}
-      } else if (m.min >= 12) {
-        c.map {_.map { x: Int => x - 12}}
-      } else {
-        c
-      }
-      val m2 = r.filter {_ != None}.map {_.get}.sorted
-      val span = m2.max - m2.min
-      if (span > 6) {
-        val diffs = m2.zip(m2.tail).map{case (x, y)=>scala.math.abs(x-y)}
-        val dm = diffs.max
-        if (dm == diffs.head) { //outlier is lowest note, need to raise it
-          val r1 = r.map {_.map{n => if (n == m2.min) n+12 else n}}
-          if (r1.filter {_ != None}.map {_.get}.min >= 12) {
-            r1.map {_.map { x: Int => x - 12}}
-          } else r1
-        } else { // outlier is highest note, need to lower it
-          r.map {_.map{n => if (n == m2.max && n > 11) n-12 else n}}
-        }
-      } else r
+  def adjustOctave2(c: FretList): FretList = {
+    def fretspan(f: FretList) = {
+      val m = f.filter {x => x.isDefined}.map {_.get}
+      m.max-m.min
     }
 
-    def transpose(c: FretList) = c.map {_.map {_ + retune(tuning)(chord.root)}}
+    def hasOpenStrings(c: FretList): Boolean = {
+      c.contains(Some(0))
+    }
+
+    def raiseStrings(c: FretList): FretList = {
+      val max = c.max.get
+      c.map{_.map {n => if (n != max && math.abs(max - n) > math.abs(max - (n+12))) n+12 else n}}
+//      c.map { case Some(0) => Some(12)
+//      case x => x
+//            }
+    }
+
+    val result = c.map{_.map{norm}}
+  //  if (hasOpenStrings(result)) {
+      val raised = raiseStrings(result)
+      if (fretspan(raised) < fretspan(result)) raised else result
+  //  } else
+    //  result
+  }
+
+  @tailrec
+  def adjustOctave(c: FretList): FretList = {
+
+    def fretspan(f: FretList) = {
+      val m = f.filter {x => x.isDefined && x.get > 0}.map {_.get}
+      m.max-m.min
+    }
+
+    val m = c.filter {_.isDefined}.map {_.get}
+    val r = if (m.min < 0) {
+      c.map {_.map { x: Int => x + 12}}
+    } else if (m.min >= 12) {
+      c.map {_.map { x: Int => x - 12}}
+    } else {
+      c
+    }
+    val m2 = r.filter {x => x.isDefined}.map {_.get}.sorted
+    val span = m2.max - m2.filter{_>0}.min
+    val result = if (span > 6) {
+      val diffs = m2.zip(m2.tail).map{case (x, y)=>scala.math.abs(x-y)}
+      val dm = diffs.max
+      if (dm == diffs.head) { //outlier is lowest note, need to raise it
+      val r1 = r.map {_.map{n => if (n == m2.min) n+12 else n}}
+        if (r1.filter {_.isDefined}.map {_.get}.min >= 12) {
+          r1.map {_.map { x: Int => x - 12}}
+        } else r1
+      } else { // outlier is highest note, need to lower it
+        r.map {_.map{n => if (n == m2.max && n > 11) n-12 else n}}
+      }
+    } else r
+//    println(s"$c, $result")
+    if (result == c || fretspan(result) >= fretspan(c)) c else adjustOctave(result)
+  }
+
+  def fingerings(chord: Chord, fretSpan: Int = 6)(implicit tuning: Tuning): List[FretList] = {
+
+
+
+    def transpose(c: FretList) = c.map {_.map {n=>n + retune(tuning)(chord.root)}}
 
     def alteredRoot(c: FretList) = {
       if (chord.altRootInterval.isDefined) {
@@ -74,12 +111,19 @@ object Operations {
 //    .padTo(6, None)
 //    .permutations  //.filter(rootPosition)
    // generatePermutations.foreach(c => println(c))
-    chord.filterFingerings(
-    generatePermutations(chord).filter(alteredRoot)
+    chord.filterFingerings({
+    val r = generatePermutations(chord).filter(alteredRoot)
     .map(_.zip(tuning.semitones)).map {_.map { a: Tuple2[Option[Int], Int] => a._1.map { x => norm(x - a._2) }}}
     .toList
-    .map { c => adjustOctave(transpose(c))}.filter(withinSpan(fretSpan))
-    .sorted(fretListOrder.toScalaOrdering))
+//    r.foreach{x=>println(x)}
+//      println("---")
+    val r2 = r.map { c =>
+//      println(s"$c, ${transpose(c)}, ${adjustOctave2(transpose(c))}")
+      adjustOctave2(transpose(c))}
+                       //      r2.foreach{x=>println(x)}
+             r2.filter(withinSpan(fretSpan))
+    .sorted(fretListOrder.toScalaOrdering)
+                           })
   }
 
   def combine(c1: FretList, c2: FretList): Option[FretList] = {

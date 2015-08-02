@@ -55,6 +55,7 @@ class ChordNamerSpec extends FlatSpec with ShouldMatchers {
     assert(ChordNamer("x 0 8 6 8 0").toString == "A7♭9")
     assert(ChordNamer("x x 0 2 3 0").toString == "Dsus2")
     assert(ChordNamer("x 0 2 0 3 0").toString == "A7sus4")
+    assert(ChordNamer("x 3 4 0 3 0").toString == "C")
   }
 
 }
