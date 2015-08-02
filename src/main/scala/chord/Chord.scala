@@ -3,14 +3,11 @@
 //todo - allow notes to be dropped - e.g. no 5
 package chord
 
-import scala.util.Try
-import scalaz._, syntax.show._
-
-class Chord(val name:String, val root: String, val triad: String, val quality: String, val extension: Int,
+class Chord(val root: String, val triad: String, val quality: String, val extension: Int,
             val alteration: String, val added: Option[String], val suspension: Option[String], val altRoot: Option[String]) {
 
   def this(c: Chord) = {
-    this(c.name, c.root, c.triad, c.quality, c.extension, c.alteration, c.added, c.suspension, c.altRoot)
+    this(c.root, c.triad, c.quality, c.extension, c.alteration, c.added, c.suspension, c.altRoot)
   }
 
   def isValid = true
@@ -170,18 +167,32 @@ class Chord(val name:String, val root: String, val triad: String, val quality: S
   }
 
   override def toString() = {
-    root + (if (extension > 0) extension.toString else "") + alteration +
+    def q = {
+      (triad match {
+        case "min" => "m"
+        case "maj" => ""
+        case "aug" => "+"
+        case t => t
+      }) + (quality match {
+        case "dom" => ""
+        case "maj" => "M"
+        case "dim" => ""
+        case c => c
+      })
+    }
+    root + q + (if (extension > 0) extension.toString else "") + added.fold(""){a=>s"add$a"} + alteration +
+    suspension.fold(""){s=>s"sus$s"} +
     altRoot.map(r => s"/$r").getOrElse("")
   }
 }
 
-object InvalidChord extends Chord("", "", "", "", 0, "", None, None, None) {
+object InvalidChord extends Chord("", "", "", 0, "", None, None, None) {
   override lazy val semitones = Nil
   override def intervals(extensions: => List[String]) = Nil
   override def isValid = false
 }
 
-class PowerChord(val n:String, val r: String) extends Chord(n, r, "", "", 0, "", None, None, None) {
+class PowerChord(val r: String) extends Chord(r, "", "", 0, "", None, None, None) {
 
   override lazy val semitones: List[Int] = List(0, 7, 0)
 
@@ -299,18 +310,19 @@ object Chord {
   }
 
   def apply(s: String) = {
-    Try {
-          val chordMatch(root, t, qual, ext, alt, _, _, _, added, _, suspension, _, altRoot) = s
-          new Chord(s, root, triad(t), seventh(t, qual), Option(ext).getOrElse("0").toInt, Option(alt).getOrElse(""),
-                    Option(added), Option(suspension), Option(altRoot))
-        }.getOrElse(Try {
-          val powerChordMatch(root) = s
-          new PowerChord(s, root)
-        }.getOrElse(InvalidChord))
+    ChordParser(s).head
+//    Try {
+//          val chordMatch(root, t, qual, ext, alt, _, _, _, added, _, suspension, _, altRoot) = s
+//          new Chord(s, root, triad(t), seventh(t, qual), Option(ext).getOrElse("0").toInt, Option(alt).getOrElse(""),
+//                    Option(added), Option(suspension), Option(altRoot))
+//        }.getOrElse(Try {
+//          val powerChordMatch(root) = s
+//          new PowerChord(s, root)
+//        }.getOrElse(InvalidChord))
   }
 
   def apply(r: String, t: Option[String], e:Option[String],q:Option[String],al:List[String],ad:Option[String],sus:Option[String],ar:Option[String]): Chord ={
-    new Chord(r, r, triad(t), seventh(t, q), e.getOrElse("0").toInt, al.mkString(""),
+    new Chord(r, triad(t), seventh(t, q), e.getOrElse("0").toInt, al.mkString(""),
               ad,sus,ar)
   }
 
