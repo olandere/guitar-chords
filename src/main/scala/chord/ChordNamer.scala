@@ -31,6 +31,8 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning)  {
 
   def hasFlatFifth = intervals.contains(Some(6))
 
+  def hasFifth = intervals.contains(Some(7))
+
   def hasAugFifth = intervals.contains(Some(8))
 
   def isDiminishedSeventh = hasMinorThird && hasFlatFifth && hasDimSeventh
@@ -88,6 +90,14 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning)  {
     } else "") + highestInt
   }
 
+  def addedIntervals = {
+    if (!has7) {
+      (if (has9 && !no3rd) "add9" else "") +
+      (if (has11 && !no3rd) "add11" else "") +
+      (if (has13) "13" else "")
+    } else ""
+  }
+
   def determineInversion = {
     if (isDiminishedSeventh) {
       println("Is dim7")
@@ -102,7 +112,7 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning)  {
 //      case List(0, 3, 6, 9) => "dim7"
 //      case List(0, 4, 8) => "aug"
 
-      case _ => "unknown"
+      case l => println(l); "root" // best guess
     }}
   }
 
@@ -129,7 +139,9 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning)  {
   }
 
   def alterations = {
-    (if (hasFlatFifth && !isDiminishedSeventh) {"♭5"} else "") +
+    (if (hasFlatFifth && !isDiminishedSeventh) {
+      if (hasFifth) "♯11" else
+      "♭5"} else "") +
     (if (hasFlat9) "♭9" else "")
   }
 
@@ -142,7 +154,12 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning)  {
 
   override def toString = {
    // val preferSharps = Set("G", "D", "A", "E", "B").contains(root) || root.contains("♯")
-    reverseNoteMap(tuning.root)(root) + quality + intervalNumber + alterations + suspension
+    reverseNoteMap(tuning.root)(root) +
+    quality +
+    intervalNumber +
+    addedIntervals +
+    alterations +
+    suspension
   }
 }
 
