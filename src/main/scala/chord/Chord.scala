@@ -330,6 +330,6 @@ object Chord {
     (if (s.trim.length == tuning.numStrings) {
       s.trim.toList.map{_.toString}
     } else delimitedToList(s))
-    .map{case "x" => None; case c => Some(c.toInt)}
+    .map{case "x" | "X" => None; case c => Some(c.toInt)}
   }
 }

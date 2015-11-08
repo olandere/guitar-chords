@@ -86,6 +86,7 @@ class ChordSpec extends FlatSpec with ShouldMatchers {
     assert(Chord.unapply("1  x 2 0 1 x") == result)
     assert(Chord.unapply("1 x 2 0 1 x ") == result)
     assert(Chord.unapply("1x201x") == result)
+    assert(Chord.unapply("1X201x") == result)
   }
 
   it should "compute diffs" in {
