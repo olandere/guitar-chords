@@ -177,11 +177,11 @@ object ChordNamer {
   //def apply(chord: List[Int]) = new ChordNamer(chord.sorted)()
 
   //accepts fingering
-  def apply(chord: String): ChordNamer = {
+  def apply(chord: String)(implicit tuning: Tuning): ChordNamer = {
     ChordNamer(Chord.unapply(chord)).respell
   }
 
-  def apply(fl: FretList) = {
+  def apply(fl: FretList)(implicit tuning: Tuning) = {
     def getRoot(fl: FretList, tuning: List[Int]): Int = {
       if (fl.head.isDefined) norm(fl.head.get+tuning.head) else getRoot(fl.tail, tuning.tail)
     }
