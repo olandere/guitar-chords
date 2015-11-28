@@ -62,4 +62,10 @@ class ChordNamerSpec extends FlatSpec with ShouldMatchers {
     assert(ChordNamer("2 2 2 0 2 2").toString == "Em")
   }
 
+  it should "name chords in altered tunings with accidentals" in {
+    implicit val tuning = Tuning("C# G# C# G# C# E")
+    assert(ChordNamer("xx3004").toString == "C♯m")
+  }
+
+
 }
