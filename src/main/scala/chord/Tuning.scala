@@ -4,7 +4,7 @@ class Tuning(val semitones: List[Int], val root: String) {
 
   override def toString = {
     val revmap = retune(this).map(e => (e._2, e._1))
-    val nmap = revmap.withDefault { n => revmap(n - 1) + "#"}
+    val nmap = revmap.withDefault { n => revmap(norm(n - 1)) + "#"}
     semitones.map {nmap}.mkString(" ")
   }
 

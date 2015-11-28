@@ -27,4 +27,9 @@ class TuningSpec extends FlatSpec with ShouldMatchers {
     assert(t.numStrings == 5)
     assert(t.semitones == List(0,2,3,5,6))
   }
+
+  it should "print the tuning" in {
+    val t = Tuning("C# G# C# G# C# E")
+    assert(t.toString == "C# G# C# G# C# E")
+  }
 }
