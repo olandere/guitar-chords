@@ -4,9 +4,11 @@ settings(
   organization <<= name,
   version := "1.0",
   scalaVersion := "2.11.7",
-  scalacOptions ++= Seq("-deprecation", "-optimise", "-feature"),
+  scalacOptions ++= Seq("-deprecation", "-optimise", "-feature", "-Yinline-warnings"),
 
   libraryDependencies ++= Seq(
+    "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
+    "org.clapper" %% "grizzled-slf4j" % "1.0.2",
     "org.scalatest" %% "scalatest" % "2.2.1" % "test",
     "org.scalaz" %% "scalaz-core" % "7.1.0",
     "org.scalacheck" %% "scalacheck" % "1.12.2" % "test",

@@ -39,9 +39,10 @@ package object chord {
     }
   }
 
-  private def revMapAccidentals(note: Int, map: Map[Int, String], preferSharps: Boolean = true) = {
-    if (preferSharps)
-    map(norm(note-1)) + "♯" else map(norm(note+1)) + "♭"
+  private def revMapAccidentals(note: Int, map: Map[Int, String], preferSharps: Boolean = true): String = {
+    if (preferSharps) {
+      map(norm(note - 1)) + "♯"
+    } else {map(norm(note + 1)) + "♭"}
   }
 
   val NOTE_MAP: Map[String, Int] =
@@ -54,31 +55,25 @@ package object chord {
 
   implicit val tuning = Tuning.StandardTuning
 
-  def retune(tuning: Tuning) = {
-    val newmap = NOTE_MAP.map { e => (e._1, norm(e._2 - NOTE_MAP(tuning.root)))}
-    newmap.withDefault { r =>
-      mapAccidentals(r, newmap)
-
-                       }
+  def retune(tuning: Tuning): Map[String, Int] = {
+    val newmap = NOTE_MAP.map { e => (e._1, norm(e._2 - NOTE_MAP(tuning.root))) }
+    newmap.withDefault { r => mapAccidentals(r, newmap)}
   }
 
-  def retune(root: String) = {
-    val newmap = NOTE_MAP.map { e => (e._1, norm(e._2 - NOTE_MAP(root)))}
-    newmap.withDefault { r =>
-      mapAccidentals(r, newmap)
-
-                       }
+  def retune(root: String): Map[String, Int] = {
+    val newmap = NOTE_MAP.map { e => (e._1, norm(e._2 - NOTE_MAP(root))) }
+    newmap.withDefault { r => mapAccidentals(r, newmap)}
   }
 
-  def reverseNoteMap(root: String, preferSharps: Boolean = true) = {
+  def reverseNoteMap(root: String, preferSharps: Boolean = true): Map[Int, String] = {
     val map = retune(root).map{case(k, v) => v -> k }
     map.withDefault(n=>revMapAccidentals(n, map, preferSharps))
   }
 
-  def norm(x: Int) = (x + 12) % 12
+  def norm(x: Int): Int = (x + 12) % 12
 
   //converts a space delimited string into a list, eliminating extraneous whitespace
-  def delimitedToList(s: String) = s.trim.split(" ").toList.filter{!_.isEmpty}
+  def delimitedToList(s: String): List[String] = s.trim.split(" ").toList.filter{!_.isEmpty}
 
   def diff(a: FretList, b: FretList): Int = {
     val shift = math.max(math.abs(a.max.get - b.filter{v => v.isDefined && v.get > 0}.min.get), math.abs(b.max.get - a.filter{v => v.isDefined && v.get > 0}.min.get))

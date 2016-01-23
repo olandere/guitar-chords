@@ -7,7 +7,7 @@ import scala.annotation.tailrec
  */
 object Operations {
 
-  def generatePermutations(chord: Chord)(implicit tuning: Tuning) = {
+  def generatePermutations(chord: Chord)(implicit tuning: Tuning): Iterator[FretList] = {
     (if (chord.altRoot.isDefined && !chord.semitones.contains(chord.altRootInterval.get)) {
       chord.semitones ++ chord.altRootInterval.toList
     } else {
@@ -36,7 +36,7 @@ object Operations {
 
     def raiseStrings(c: FretList): FretList = {
       val max = c.max.get
-      c.map{_.map {n => if (n != max && math.abs(max - n) > math.abs(max - (n+12))) n+12 else n}}
+      c.map{_.map {n => if (n != max && math.abs(max - n) > math.abs(max - (n + 12))) n + 12 else n}}
 //      c.map { case Some(0) => Some(12)
 //      case x => x
 //            }
@@ -53,7 +53,7 @@ object Operations {
   @tailrec
   def adjustOctave(c: FretList): FretList = {
 
-    def fretspan(f: FretList) = {
+    def fretspan(f: FretList): Int = {
       val m = f.filter {x => x.isDefined && x.get > 0}.map {_.get}
       m.max-m.min
     }
@@ -86,22 +86,21 @@ object Operations {
 
   def fingerings(chord: Chord, fretSpan: Int = 6)(implicit tuning: Tuning): List[FretList] = {
 
-
-
     def transpose(c: FretList) = c.map {_.map {n=>n + retune(tuning)(chord.root)}}
 
-    def alteredRoot(c: FretList) = {
+    def alteredRoot(c: FretList): Boolean = {
       if (chord.altRootInterval.isDefined) {
         c.dropWhile(_.isEmpty).head == chord.altRootInterval
       } else true
     }
 
     def rootPosition(c: FretList): Boolean =
-      if (c.isEmpty) false else
-      if (c.head.isDefined) {
-        c.head.get == 0
-      } else {
-        rootPosition(c.tail)
+      if (c.isEmpty) {false} else {
+        if (c.head.isDefined) {
+          c.head.get == 0
+        } else {
+          rootPosition(c.tail)
+        }
       }
 
 
@@ -128,17 +127,16 @@ object Operations {
 
   def combine(c1: FretList, c2: FretList): Option[FretList] = {
     def helper(c1: FretList, c2: FretList, acc: FretList): Option[FretList] = {
-      if (c1.isEmpty) Some(acc)
-        else if (c1.head.isDefined) {
-          if (c2.head.isDefined) {
-            if (c1.head == c2.head) {
-              helper(c1.tail, c2.tail, acc :+ c1.head)
-            } else {
-              None
-            }
-          } else {
+      if (c1.isEmpty) {Some(acc)} else if (c1.head.isDefined) {
+        if (c2.head.isDefined) {
+          if (c1.head == c2.head) {
             helper(c1.tail, c2.tail, acc :+ c1.head)
+          } else {
+            None
           }
+        } else {
+          helper(c1.tail, c2.tail, acc :+ c1.head)
+        }
       } else {
         helper(c1.tail, c2.tail, acc :+ c2.head)
       }
@@ -148,11 +146,9 @@ object Operations {
 
   def condense(chords: List[FretList], fretSpan: Int): List[FretList] = {
     def helper(chords: List[FretList], chord: FretList, acc: List[FretList]): List[FretList] = {
-      if (chords.isEmpty) acc :+ chord
-      else {
+      if (chords.isEmpty) {acc :+ chord} else {
         val nc = combine(chords.head, chord)
-        if (nc.isDefined) helper(chords.tail, nc.get, acc)
-        else helper(chords.tail, chords.head, acc :+ chord)
+        if (nc.isDefined) {helper(chords.tail, nc.get, acc)} else {helper(chords.tail, chords.head, acc :+ chord)}
       }
     }
     helper(chords.tail, chords.head, List()).filter(withinSpan(fretSpan))
@@ -160,7 +156,7 @@ object Operations {
 
   def chords(chord: String)(implicit tuning: Tuning) = {
     def getRoot(fl: FretList, tuning: List[Int]): Int = {
-      if (fl.head.isDefined) norm(fl.head.get+tuning.head) else getRoot(fl.tail, tuning.tail)
+      if (fl.head.isDefined) {norm(fl.head.get+tuning.head)} else {getRoot(fl.tail, tuning.tail)}
     }
 
     def intervals(fl: FretList, root: Int) = {
@@ -174,15 +170,14 @@ object Operations {
     (namer.intervals map (_.map(SEMI_TO_INT).getOrElse("x")), namer.toString)//.mkString(" ")
   }
 
-  def progression(chords: List[Chord], fretSpan: Int)(implicit tuning: Tuning) = {
+  def progression(chords: List[Chord], fretSpan: Int)(implicit tuning: Tuning): List[List[FretList]] = {
 
-    def proximitySort(f: FretList, fl: List[FretList]):List[FretList] = {
+    def proximitySort(f: FretList, fl: List[FretList]): List[FretList] = {
       fl.map{fi => (fi, diff(f, fi))}.sortBy{_._2}.map{_._1}
     }
 
     def helper(chord: FretList, fl: List[List[FretList]]): List[FretList] = {
-      if (fl.isEmpty) List(chord)
-      else {
+      if (fl.isEmpty) {List(chord)} else {
         val closest = proximitySort(chord, fl.head).head
         chord :: helper(closest, fl.tail)
       }
@@ -204,10 +199,10 @@ object Operations {
 //    } yield (f1, f2)
   }
 
-  def fingering(scale: Scale)(implicit tuning: Tuning) = {
+  def fingering(scale: Scale)(implicit tuning: Tuning): Array[List[Int]] = {
     for {
      root <- tuning.toString.split(" ")
-     frets = (scale.intervals ++ scale.intervals.map(_+12)).map {_ + retune(root)(scale.root)}
+     frets = (scale.intervals ++ scale.intervals.map(_ + 12)).map {_ + retune(root)(scale.root)}
     }
     yield (frets ++ frets.map(_ % 12)).sorted.distinct.filter(_ < 16)
   }

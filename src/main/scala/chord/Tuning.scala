@@ -2,13 +2,13 @@ package chord
 
 class Tuning(val semitones: List[Int], val root: String) {
 
-  override def toString = {
+  override def toString: String = {
     val revmap = retune(this).map(e => (e._2, e._1))
     val nmap = revmap.withDefault { n => revmap(norm(n - 1)) + "#"}
     semitones.map {nmap}.mkString(" ")
   }
 
-  def numStrings = semitones.length
+  def numStrings: Int = semitones.length
 }
 
 object Tuning {
