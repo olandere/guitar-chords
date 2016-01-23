@@ -1,9 +1,11 @@
 package chord
 
+import grizzled.slf4j.Logging
+
 /**
  * Created by eolander on 2/17/15.
  */
-class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning)  {
+class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning) extends Logging {
   import ChordNamer._
 
   println(s"fl: $fl, root: $root")
@@ -103,11 +105,13 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning)  {
       println("Is dim7")
       "root" //otherwise a diminished looks like 1st inversion
      } else {
+      info(intervals.distinct)
+      info(fretListToIntList(intervals.distinct).sorted map SEMI_TO_DEGREE)
     fretListToIntList(intervals.distinct).sorted map SEMI_TO_DEGREE match {
       case List(0, 3, 5) | List(0, 3, 5, 7) => "root" // case classes???
       case List(0, 3, 6) | List(0, 3, 5, 6) => "1st"
       case List(0, 4, 6) | List(0, 3, 4, 6) => "2nd"
-      case List(0, 2, 4, 6) => "3rd"
+      case List(0, 2, 4, 6) | List(0, 2, 5, 6) => "3rd" // try to handle tritone
 //      case List(0, 3, 6) => "dim"
 //      case List(0, 3, 6, 9) => "dim7"
 //      case List(0, 4, 8) => "aug"

@@ -24,6 +24,8 @@ class ChordNamerSpec extends FlatSpec with ShouldMatchers {
     assert(ChordNamer(Chord.unapply("5 x 6 6 5 x")).determineInversion == "root")
     assert(ChordNamer(Chord.unapply("x 3 5 4 5 x")).determineInversion == "root")
     assert(ChordNamer(Chord.unapply("x 3 4 2 4 x")).determineInversion == "root")
+    assert(ChordNamer(Chord.unapply("x 3 3 2 3 x")).determineInversion == "3rd")
+    assert(ChordNamer(Chord.unapply("x 3 4 2 3 x")).determineInversion == "3rd")
   }
 
   it should "handle extensions" in {
@@ -55,6 +57,8 @@ class ChordNamerSpec extends FlatSpec with ShouldMatchers {
     assert(ChordNamer("x x 0 2 3 0").toString == "Dsus2")
     assert(ChordNamer("x 0 2 0 3 0").toString == "A7sus4")
     assert(ChordNamer("x 3 4 0 3 0").toString == "Cadd9♯11")
+    assert(ChordNamer("x 3 3 2 3 x").toString == "Dm7")
+    assert(ChordNamer("x 3 4 2 3 x").toString == "D7")
   }
 
   it should "name chords in altered tunings" in {

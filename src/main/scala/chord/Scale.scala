@@ -29,77 +29,77 @@ sealed trait Scale {
 
 case class MajorScale(root: String) extends Scale {
 
-  def intervals = List(0, 2, 4, 5, 7, 9, 11)//List(2,2,1,2,2,2,1)
+  def intervals: List[Int] = List(0, 2, 4, 5, 7, 9, 11)//List(2,2,1,2,2,2,1)
 
   def relatedScale = this
 }
 
 case class HarmonicMinor(root: String) extends Scale {
 
-  def intervals = List(0, 2, 3, 5, 7, 8, 11)
+  def intervals: List[Int] = List(0, 2, 3, 5, 7, 8, 11)
 
   def relatedScale = this
 }
 
 case class Dorian(root: String) extends Scale {
 
-  def intervals = List(0, 2, 3, 5, 7, 9, 10)//List(2,1,2,2,2,1,2)
+  def intervals: List[Int] = List(0, 2, 3, 5, 7, 9, 10)//List(2,1,2,2,2,1,2)
 
   def relatedScale = MajorScale(notes(10))
 }
 
 case class Phrygian(root: String) extends Scale {
 
-  def intervals = List(0, 1, 3, 5, 7, 8, 10)
+  def intervals: List[Int] = List(0, 1, 3, 5, 7, 8, 10)
 
   def relatedScale = MajorScale(notes(8))
 }
 
 case class PhrygianDominant(root: String) extends Scale {
 
-  def intervals = List(0, 1, 4, 5, 7, 8, 10)
+  def intervals: List[Int] = List(0, 1, 4, 5, 7, 8, 10)
 
   def relatedScale = HarmonicMinor(notes(5))
 }
 
 case class DoubleHarmonic(root: String) extends Scale {
 
-  def intervals = List(0, 1, 4, 5, 7, 8, 11)
+  def intervals: List[Int] = List(0, 1, 4, 5, 7, 8, 11)
 
   def relatedScale = this
 }
 
 case class Lydian(root: String) extends Scale {
 
-  def intervals = List(0, 2, 4, 6, 7, 9, 11)
+  def intervals: List[Int] = List(0, 2, 4, 6, 7, 9, 11)
 
   def relatedScale = MajorScale(notes(7))
 }
 
 case class LydianDominant(root: String) extends Scale {
 
-  def intervals = List(0, 2, 4, 6, 7, 9, 10)
+  def intervals: List[Int] = List(0, 2, 4, 6, 7, 9, 10)
 
   def relatedScale = MajorScale(notes(7))
 }
 
 case class Mixolydian(root: String) extends Scale {
 
-  def intervals = List(0, 2, 4, 5, 7, 9, 10)
+  def intervals: List[Int] = List(0, 2, 4, 5, 7, 9, 10)
 
   def relatedScale = MajorScale(notes(5))
 }
 
 case class Aeolian(root: String) extends Scale {
 
-  def intervals = List(0, 2, 3, 5, 7, 8, 10)
+  def intervals: List[Int] = List(0, 2, 3, 5, 7, 8, 10)
 
   def relatedScale = MajorScale(notes(3))
 }
 
 case class Locrian(root: String) extends Scale {
 
-  def intervals = List(0, 1, 3, 5, 6, 8, 10)
+  def intervals: List[Int] = List(0, 1, 3, 5, 6, 8, 10)
 
   def relatedScale = MajorScale(notes(1))
 }
