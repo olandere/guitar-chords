@@ -49,6 +49,8 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning) exten
 
   def hasExtensions = has9 || has11 || has13
 
+  def isAugmented = hasMajorThird && hasAugFifth
+
   def apply(): String = {
     if (isDiminishedSeventh) "dim7"
     else if (hasMinorThird) {
@@ -84,7 +86,8 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning) exten
 
   def intervalNumber = { //todo: handle suspensions
     def highestInt = {
-      if (has13) "13" else if (has11 && !no3rd) "11" else if (has9 && !no3rd) "9" else "7"
+      if (has13) {if (!has7) "6" else "13"} else
+      if (has11 && !no3rd) "11" else if (has9 && !no3rd) "9" else "7"
     }
     if (!has7) "" else
     (if (hasMajSeven) {
@@ -96,12 +99,12 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning) exten
     if (!has7) {
       (if (has9 && !no3rd) "add9" else "") +
       (if (has11 && !no3rd) "add11" else "") +
-      (if (has13) "13" else "")
+      (if (has13) {if (!has7) "6" else "13"} else "")
     } else ""
   }
 
   def determineInversion = {
-    if (isDiminishedSeventh) {
+    if (isDiminishedSeventh || isAugmented) {
       println("Is dim7")
       "root" //otherwise a diminished looks like 1st inversion
      } else {
