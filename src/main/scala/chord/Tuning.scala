@@ -9,6 +9,11 @@ class Tuning(val semitones: List[Int], val root: String) {
   }
 
   def numStrings: Int = semitones.length
+
+  override def equals(obj: Any) = obj match {
+    case that: Tuning => semitones == that.semitones && root == that.root
+    case _ => false
+  }
 }
 
 object Tuning {
@@ -22,9 +27,12 @@ object Tuning {
 
   // notes is space delimited - "E A D G B E", note lowest to highest
   def apply(notes: String): Tuning = {
-    val noteArr = delimitedToList(notes).map(_.capitalize)
-    val root = noteArr.head
-    val semitones = noteArr.toList.map { n => norm(NOTE_MAP(n) - NOTE_MAP(root))}
+    apply(delimitedToList(notes).map(_.capitalize))
+  }
+
+  def apply(notes: List[String]): Tuning = {
+    val root = notes.head
+    val semitones = notes.map { n => norm(NOTE_MAP(n) - NOTE_MAP(root))}
     new Tuning(semitones, root)
   }
 }
