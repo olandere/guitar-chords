@@ -25,7 +25,7 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
       def substitute(ints: List[String], alts: List[String]): List[String] = {
         println(s"ints: $ints, alts: $alts")
         if (alts.isEmpty) {ints} else if (ints.isEmpty) {alts} else {
-          if (alts.head.endsWith(ints.head)) {
+          if (alts.head.tail == ints.head) {
             alts.head :: substitute(ints.tail, alts.tail)
           } else {
             ints.head :: substitute(ints.tail, alts)
@@ -36,7 +36,7 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
       if (alteration.isEmpty) {
         ints
       } else {
-        val altMatch = """([#b♯♭](5|9|11))""".r
+        val altMatch = """([#b♯♭](5|9|11|13))""".r
         substitute(ints, altMatch.findAllIn(alteration).toList)
       }
     }
@@ -85,11 +85,11 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
 
   lazy val semitones: List[Int] = intervals().map(INT_MAP.withDefault { i =>
     if (i.startsWith("b") || i.startsWith("♭")) {
-      -1 + INT_MAP(i(1).toString)
+      -1 + INT_MAP(i.tail.toString)
     } else if (i.startsWith("°")) {
-      -2 + INT_MAP(i(1).toString)
+      -2 + INT_MAP(i.tail.toString)
     } else {
-      1 + INT_MAP(i(1).toString)
+      1 + INT_MAP(i.tail.toString)
     }
                                                                })
 

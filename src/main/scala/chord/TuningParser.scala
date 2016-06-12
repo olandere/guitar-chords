@@ -23,8 +23,12 @@ trait TuningParser extends RegexParsers {
 }
 
 object TuningParser extends TuningParser {
+  import scala.collection.immutable.StringOps
+
+  def capitalize(str: String): String = new StringOps(str).map (c => if ("acdefg".contains(c)) c.toUpper else c)
+
   def apply(input: String): Tuning = {
-    parseAll(tuning, input) match {
+    parseAll(tuning, capitalize(input)) match {
       case Success(result, _) => result
       case failure: NoSuccess => scala.sys.error(failure.msg)
     }
