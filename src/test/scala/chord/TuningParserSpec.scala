@@ -12,6 +12,10 @@ class TuningParserSpec extends FlatSpec with ShouldMatchers {
     assert(TuningParser("DADGAD") == Tuning.DADGAD)
   }
 
+  it should "not care about caseing" in {
+    assert(TuningParser("dadgad") == Tuning.DADGAD)
+  }
+
   it should "understand Joni Mitchell notation" in {
     assert(TuningParser("E55545") == Tuning.StandardTuning)
   }

@@ -16,7 +16,7 @@ trait ChordParser extends RegexParsers {
   val triad : Parser[String] = """m|-|\+|aug|dim|°""".r ^^ {_.toString}
   val quality: Parser[String] = """M|maj""".r ^^ {_.toString}
   val ext : Parser[String] = """6|7|9|11|13""".r ^^ {_.toString}
-  val alteration:Parser[String] = """[♯#b♭](5|9|11)""".r ^^ {_.toString}
+  val alteration:Parser[String] = """[♯#b♭](5|9|11|13)""".r ^^ {_.toString}
   val addedNote :Parser[String] = """add|/""".r ~> """[♯#b♭]?9|11|13""".r ^^ {_.toString}
   val suspension: Parser[String] = "sus" ~> """2|4""".r ^^ {_.toString}
   val altRoot : Parser[String] = """/[ABCDEFG][♯#b♭]?""".r ^^ {_.toString.tail}

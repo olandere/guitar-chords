@@ -101,4 +101,12 @@ class ChordSpec extends FlatSpec with ShouldMatchers {
     assert(Chord("Asus4").semitones == List(0, 5, 7))
     assert(Chord("Asus2").semitones == List(0, 2, 7))
   }
+
+  it should "handle #11 chords" in {
+    assert(Chord("C7#11").semitones == List(0, 4, 7, 10, 6))
+  }
+
+  it should "handle b13 chords" in {
+    assert(Chord("C7b13").semitones == List(0, 4, 7, 10, 8))
+  }
 }
