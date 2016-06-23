@@ -19,7 +19,17 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
       Some(norm(NOTE_MAP(altRoot.get) - NOTE_MAP(root)))
     } else {None}
 
-    def intervals(extensions: => List[String] = Range(9, extension + 1, 2).toList.map(_.toString)): List[String] = {
+  /**
+    * In case the chord has more tones than the instrument has strings, we need to split the semitones into
+    * essential and non-essential intervals
+    */
+  def splitIntervals(strings: Int) = {
+    if (strings > semitones.length) (semitones, Nil) else {
+      (asShell.semitones, semitones.filterNot(i => asShell.semitones.contains(i)))
+    }
+  }
+
+  def intervals(extensions: => List[String] = Range(9, extension + 1, 2).toList.map(_.toString)): List[String] = {
 
     def performAlterations(ints: List[String]) = {
       def substitute(ints: List[String], alts: List[String]): List[String] = {
@@ -41,14 +51,15 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
       }
     }
 
-      def performSuspensions(ints: List[String]) = {
-        if (suspension.isEmpty) {
-          ints
-        } else {
-          ints.map { case "3" | "♭3" => suspension.map { case "2" => "9"
-          case _ => "11"
+    def performSuspensions(ints: List[String]) = {
+      if (suspension.isEmpty) {
+        ints
+      } else {
+        ints.map {
+                     case "3" | "♭3" => suspension.map { case "2" => "9"
+                                                         case _ => "11"
                                                        }.get
-          case x => x
+                     case x => x
                    }
         }
       }
@@ -61,21 +72,21 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
       case "aug" => "♯5"
       case _ => "5"
     })) ++
-                             (if (extension == 0) {
-                               Nil
-                             } else if (extension == 6) {
-                               List("6")
-                             } else {
-                               if (quality == "maj") {
-                                 List("7")
-                               } else {
-                                 if (quality == "dim" || quality == "°") {
-                                   List("°7")
-                                 } else if (quality != "add") {
-                                   List("♭7")
-                                 } else Nil
-                               }
-                             }) ++ (if (extension > 7 && quality != "add") {
+     (if (extension == 0) {
+       Nil
+     } else if (extension == 6) {
+       List("6")
+     } else {
+       if (quality == "maj") {
+         List("7")
+       } else {
+         if (quality == "dim" || quality == "°") {
+           List("°7")
+         } else if (quality != "add") {
+           List("♭7")
+         } else Nil
+       }
+     }) ++ (if (extension > 7 && quality != "add") {
       extensions
     } else {
       Nil

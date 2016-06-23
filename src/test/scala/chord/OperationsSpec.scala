@@ -26,7 +26,7 @@ class OperationsSpec extends FlatSpec with ShouldMatchers {
     implicit val tuning = Tuning("D G B D")
     assert(fingerings(Chord("A"), 4).map{_.shows}.contains("x 2 2 2"))
     assert(fingerings(Chord("E7").asShell, 4).map{_.shows}.contains("x 1 3 2"))
-    assert(fingerings(Chord("C")).map{_.shows}.forall(c=>c.exists(_=='x')))  //todo: should have exactly one 'x'
+    assert(fingerings(Chord("C"), 6, true).map{_.shows}.forall(c=>c.exists(_=='x')))  //todo: should have exactly one 'x'
   }
 
   it should "handle slash chords" in {
@@ -43,6 +43,13 @@ class OperationsSpec extends FlatSpec with ShouldMatchers {
     assert(fingerings(Chord("Cadd11"), 4).map{_.shows}.contains("x 3 3 0 5 x"))
     assert(fingerings(Chord("Cmadd11"), 4).map{_.shows}.contains("x 3 3 x 4 3"))
     assert(fingerings(Chord("C6add11"), 4).map{_.shows}.contains("x 3 3 0 5 5"))
+  }
+
+  it should "understand 13 chords" in {
+    val c = Chord("C13")
+    assert(fingerings(c, 4).map{_.shows}.contains("3 3 5 3 5 5"))
+
+    assert(fingerings(c, 4).map{f : FretList => c.asDegrees(f)}.forall(_.contains(Some("13"))))
   }
 
   it should "unfortunately, handle power chords" in {
@@ -150,5 +157,10 @@ class OperationsSpec extends FlatSpec with ShouldMatchers {
   it should "correctly adjust octaves" in {
     assert(adjustOctave2(Chord.unapply("x 7 8 17 8 x")) == Chord.unapply("x 7 8 5 8 x"))
     assert(adjustOctave2(Chord.unapply("x 19 8 17 8 x")) == Chord.unapply("x 7 8 5 8 x"))
+  }
+
+  it should "generate barre chords" in {
+    assert(fingerings(Chord("E")).map{_.shows}.contains("0 2 2 1 0 0"))
+    assert(fingerings(Chord("Am")).map{_.shows}.contains("x 0 2 2 1 0"))
   }
 }

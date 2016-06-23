@@ -10,8 +10,8 @@ settings(
     "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
     "org.clapper" %% "grizzled-slf4j" % "1.0.2",
     "org.scalatest" %% "scalatest" % "2.2.6" % "test",
-    "org.scalaz" %% "scalaz-core" % "7.1.0",
-    "org.scalacheck" %% "scalacheck" % "1.12.2" % "test",
+    "org.scalaz" %% "scalaz-core" % "7.2.4",
+    "org.scalacheck" %% "scalacheck" % "1.13.0" % "test",
     "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
   ),
 
