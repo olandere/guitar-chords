@@ -7,12 +7,20 @@ import scala.annotation.tailrec
  */
 object Operations {
 
-  def generatePermutations(chord: Chord)(implicit tuning: Tuning): Iterator[FretList] = {
-    (if (chord.altRoot.isDefined && !chord.semitones.contains(chord.altRootInterval.get)) {
+  def generatePermutations(chord: Chord, withRepetition: Boolean = true)(implicit tuning: Tuning): Iterator[FretList] = {
+    val semitones = (if (chord.altRoot.isDefined && !chord.semitones.contains(chord.altRootInterval.get)) {
       chord.semitones ++ chord.altRootInterval.toList
     } else {
       chord.semitones
-    }).map {Some(_)}.padTo(tuning.numStrings, None).permutations
+    }).map{Some(_)}
+    if (withRepetition) {
+      val (essential, optional) = chord.splitIntervals(tuning.numStrings)
+  //    println(s"$semitones, $essential, $optional")
+  //    println(semitones.filterNot(n => optional.contains(n.get)))
+      combWithRepeat((if (optional.isEmpty) essential else optional).map{Some(_)} ++ List(None),
+                     tuning.numStrings - essential.length).map{l => l ++ semitones.filterNot(n => optional.contains(n.get))}
+      .flatMap(_.permutations).toIterator}
+    else semitones.padTo(tuning.numStrings, None).permutations
   }
 
   private def withinSpan(fretSpan: Int)(c: FretList): Boolean = {
@@ -84,7 +92,7 @@ object Operations {
     if (result == c || fretspan(result) >= fretspan(c)) c else adjustOctave(result)
   }
 
-  def fingerings(chord: Chord, fretSpan: Int = 6)(implicit tuning: Tuning): List[FretList] = {
+  def fingerings(chord: Chord, fretSpan: Int = 6, jazzVoicing: Boolean = false)(implicit tuning: Tuning): List[FretList] = {
 
     def transpose(c: FretList) = c.map {_.map {n=>n + retune(tuning)(chord.root)}}
 
@@ -111,7 +119,7 @@ object Operations {
 //    .permutations  //.filter(rootPosition)
    // generatePermutations.foreach(c => println(c))
     chord.filterFingerings({
-    val r = generatePermutations(chord).filter(alteredRoot)
+    val r = generatePermutations(chord, !jazzVoicing).toSet.filter(alteredRoot)
     .map(_.zip(tuning.semitones)).map {_.map { a: Tuple2[Option[Int], Int] => a._1.map { x => norm(x - a._2) }}}
     .toList
 //    r.foreach{x=>println(x)}
@@ -119,7 +127,7 @@ object Operations {
     val r2 = r.map { c =>
 //      println(s"$c, ${transpose(c)}, ${adjustOctave2(transpose(c))}")
       adjustOctave2(transpose(c))}
-                       //      r2.foreach{x=>println(x)}
+                           //  r2.foreach{x=>println(x)}
              r2.filter(withinSpan(fretSpan))
     .sorted(fretListOrder.toScalaOrdering)
                            })
@@ -209,5 +217,18 @@ object Operations {
 
   def possibleScales(chord: Chord)(implicit tuning: Tuning) = {
     Scale.allScales(chord.root).filter(_.containsChord(chord))
+  }
+
+  def combWithRepeat[T](input: List[T], length: Int) = {
+
+    def helper(inSet: List[T], result: List[T], len: Int): List[List[T]] = {
+      if (len == 0) List(result)
+      else {
+        helper(inSet, result :+ inSet.head, len - 1) ++
+        (if (inSet.length > 1) helper(inSet.tail, result, len) else Nil)
+      }
+    }
+    require (length > 0)
+    helper(input, Nil, length)
   }
 }
