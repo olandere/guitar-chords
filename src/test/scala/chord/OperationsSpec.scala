@@ -163,4 +163,10 @@ class OperationsSpec extends FlatSpec with ShouldMatchers {
     assert(fingerings(Chord("E")).map{_.shows}.contains("0 2 2 1 0 0"))
     assert(fingerings(Chord("Am")).map{_.shows}.contains("x 0 2 2 1 0"))
   }
+
+  it should "handle chords with more tones than strings" in {
+    implicit val tuning = Tuning("G D A E")
+    val c = Chord("C13")
+    assert(fingerings(c, 4).map{f : FretList => c.asDegrees(f)}.forall(_.contains(Some("13"))))
+  }
 }
