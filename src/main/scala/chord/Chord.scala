@@ -154,7 +154,7 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
     a.zip(tuning.semitones).map { case (f, s) => f.map { n => norm(n + s - retune(tuning)(root))}}
   }
 
-  def asDegrees(a: FretList)(implicit tuning: Tuning): List[Option[String]] = {
+  def asDegrees(a: FretList)(implicit tuning: Tuning): DegreeList = {
     println(s"asDegrees($a) tuning: $tuning")
     val mapping = SEMI_TO_INT ++ semitones.zip(intervals()).toMap ++ (if (suspension.isDefined) Map(2 -> "2", 5 -> "4") else Map.empty)
     a.zip(tuning.semitones).map { case (f, s) => f.map { n => mapping(norm(n + s - retune(tuning)(root)))}

@@ -2,7 +2,7 @@ package chord
 
 import chord.Operations._
 import org.scalatest._
-import scalaz._, syntax.show._
+import cats.implicits._
 
 /**
  * Created by eolander on 2/17/15.
@@ -76,15 +76,15 @@ class ChordNamerSpec extends FlatSpec with ShouldMatchers {
 
   it should "name all inversions" in {
     val am7 = Chord("Am7")
-    assert(fingerings(am7, 5).forall { c => ChordNamer(c.shows).toString == "Am7" })
+    assert(fingerings(am7, 5).forall { c => ChordNamer(c.show).toString == "Am7" })
 
     val aM7 = Chord("AM7")
-    assert(fingerings(aM7, 5).forall { c => ChordNamer(c.shows).toString == "AM7" })
+    assert(fingerings(aM7, 5).forall { c => ChordNamer(c.show).toString == "AM7" })
 
     val a7 = Chord("A7")
-    assert(fingerings(a7, 5).forall { c => ChordNamer(c.shows).toString == "A7" })
+    assert(fingerings(a7, 5).forall { c => ChordNamer(c.show).toString == "A7" })
 
     val am7b5 = Chord("Am7♭5")
-    assert(fingerings(am7b5, 5).forall { c => Set("Am7♭5", "Cm6")(ChordNamer(c.shows).toString) })
+    assert(fingerings(am7b5, 5).forall { c => Set("Am7♭5", "Cm6")(ChordNamer(c.show).toString) })
   }
 }
