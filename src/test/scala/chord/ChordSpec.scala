@@ -1,7 +1,7 @@
 package chord
 
 import org.scalatest._
-import scalaz._, syntax.show._
+import cats.implicits._
 
 /**
  * Created by eolander on 1/4/15.
@@ -30,23 +30,23 @@ class ChordSpec extends FlatSpec with ShouldMatchers {
   it should "have the correct degrees" in {
     val C6 = Chord("C6")
     val fingering = Chord.unapply("x 3 2 2 x 3")
-    assert(!C6.asDegrees(fingering).shows.split(" ").contains("13"))
-    assert(C6.asDegrees(fingering).shows.split(" ").contains("R"))
+    assert(!C6.asDegrees(fingering).show.split(" ").contains("13"))
+    assert(C6.asDegrees(fingering).show.split(" ").contains("R"))
   }
 
   it should "have the correct degrees with altered tuning" in {
     implicit val tuning = Tuning("D G B D")
     val G = Chord("G")
     val fingering = Chord.unapply("x 0 0 0")
-    assert(!G.asDegrees(fingering).shows.split(" ").contains("13"))
-    assert(G.asDegrees(fingering).shows.split(" ").contains("R"))
+    assert(!G.asDegrees(fingering).show.split(" ").contains("13"))
+    assert(G.asDegrees(fingering).show.split(" ").contains("R"))
   }
 
   it should "handle slash chords" in {
     implicit val tuning = Tuning.StandardTuning
     val chord = Chord("A/F")
     val fingering = Chord.unapply("1 x 2 0 1 x")
-    chord.asDegrees(fingering).shows
+    chord.asDegrees(fingering).show
   }
 
   it should "handle power chords" in {
@@ -54,7 +54,7 @@ class ChordSpec extends FlatSpec with ShouldMatchers {
     val G5 = Chord("G5")
     assert(G5.semitones == List(0,7,0))
     val fingering = Chord.unapply("3 5 5 x x x")
-    assert(G5.asDegrees(fingering).shows == "R 5 R x x x")
+    assert(G5.asDegrees(fingering).show == "R 5 R x x x")
   }
 
   it should "handle add9 chords" in {
@@ -76,7 +76,7 @@ class ChordSpec extends FlatSpec with ShouldMatchers {
     val c = Chord("C")
     assert(c.semitones == List(0,4,7))
     val fingering = Chord.unapply("2 0 1 x")
-    assert(c.asDegrees(fingering).shows == "3 5 R x")
+    assert(c.asDegrees(fingering).show == "3 5 R x")
   }
 
   it should "handle frettings" in {

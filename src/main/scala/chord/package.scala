@@ -1,35 +1,36 @@
 //package chord
 
-import scalaz.Ordering.{GT, LT, EQ}
-import scalaz._
+import cats._
 import scala.language.implicitConversions
 
 package object chord {
   type FretList = List[Option[Int]]
   type DegreeList = List[Option[String]]
 
-  implicit val fretListShow: Show[FretList] = Show.shows(_.map {_.getOrElse("x")}.mkString(" "))
+  implicit val fretListShow: Show[FretList] = Show.show(_.map {_.getOrElse("x")}.mkString(" "))
 
-  implicit val fretListOrder: Order[FretList] = Order.order((a, b) => {
-    def helper(fl1: FretList, fl2: FretList): Ordering = {
+  implicit val fretListOrder: Order[FretList] = new Order[FretList] {
+    def compare(x: FretList, y: FretList): Int = {
+      def helper(fl1: FretList, fl2: FretList): Int = {
       if (fl1.isEmpty || fl2.isEmpty) {
-        EQ
-      } else if (!fl1.head.isDefined) {
+        0
+      } else if (fl1.head.isEmpty) {
         helper(fl1.tail, fl2)
-      } else if (!fl2.head.isDefined) {
+      } else if (fl2.head.isEmpty) {
         helper(fl1, fl2.tail)
       } else if (fl1.head.get == fl2.head.get) {
         helper(fl1.tail, fl2.tail)
       } else if (fl1.head.get < fl2.head.get) {
-        LT
+        -1
       } else {
-        GT
+        1
       }
     }
-    helper(a, b)
-  })
+    helper(x, y)
+    }
+  }
 
-  implicit val degreeListShow: Show[DegreeList] = Show.shows(_.map {_.getOrElse("x")}.mkString(" "))
+  implicit val degreeListShow: Show[DegreeList] = Show.show(_.map {_.getOrElse("x")}.mkString(" "))
 
   private def mapAccidentals(note: String, map: Map[String, Int]) = {
     if (note.endsWith("b") || note.endsWith("♭")) {

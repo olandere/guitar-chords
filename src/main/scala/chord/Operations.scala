@@ -129,7 +129,7 @@ object Operations {
       adjustOctave2(transpose(c))}
                            //  r2.foreach{x=>println(x)}
              r2.filter(withinSpan(fretSpan))
-    .sorted(fretListOrder.toScalaOrdering)
+    .sorted(fretListOrder.toOrdering)
                            })
   }
 
