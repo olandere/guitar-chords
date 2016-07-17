@@ -1,11 +1,17 @@
 package chord
 
+import cats.{Functor, Foldable}
+import cats.implicits._
+
 import scala.annotation.tailrec
 
 /**
  * Created by eolander on 12/25/14.
  */
 object Operations {
+
+  val fretListFold = Foldable[List].compose[Option]
+  val fretListFunc = Functor[List].compose[Option]
 
   def generatePermutations(chord: Chord, withRepetition: Boolean = true)(implicit tuning: Tuning): Iterator[FretList] = {
     val semitones = (if (chord.altRoot.isDefined && !chord.semitones.contains(chord.altRootInterval.get)) {
@@ -24,7 +30,7 @@ object Operations {
   }
 
   private def withinSpan(fretSpan: Int)(c: FretList): Boolean = {
-    val m = c.filter {_.isDefined}.map {_.get}.filter{_>0}
+    val m = fretListFold.filter_(c) {_ > 0}
     if (m.isEmpty) {
       false
     } else {
@@ -34,7 +40,7 @@ object Operations {
 
   def adjustOctave2(c: FretList): FretList = {
     def fretspan(f: FretList) = {
-      val m = f.filter {x => x.isDefined}.map {_.get}
+      val m = fretListFold.filter_(f) { _ => true }
       m.max-m.min
     }
 
@@ -44,7 +50,7 @@ object Operations {
 
     def raiseStrings(c: FretList): FretList = {
       val max = c.max.get
-      c.map{_.map {n => if (n != max && math.abs(max - n) > math.abs(max - (n + 12))) n + 12 else n}}
+      fretListFunc.map(c){n => if (n != max && math.abs(max - n) > math.abs(max - (n + 12))) n + 12 else n}
 //      c.map { case Some(0) => Some(12)
 //      case x => x
 //            }
@@ -62,20 +68,20 @@ object Operations {
   def adjustOctave(c: FretList): FretList = {
 
     def fretspan(f: FretList): Int = {
-      val m = f.filter {x => x.isDefined && x.get > 0}.map {_.get}
-      m.max-m.min
+      val m = fretListFold.filter_(f) {_ > 0}
+      m.max - m.min
     }
 
-    val m = c.filter {_.isDefined}.map {_.get}
+    val m = fretListFold.filter_(c) { _ => true }
     val r = if (m.min < 0) {
-      c.map {_.map { x: Int => x + 12}}
+      fretListFunc.map(c) { x: Int => x + 12 }
     } else if (m.min >= 12) {
-      c.map {_.map { x: Int => x - 12}}
+      fretListFunc.map(c) { x: Int => x - 12 }
     } else {
       c
     }
-    val m2 = r.filter {x => x.isDefined}.map {_.get}.sorted
-    val span = m2.max - m2.filter{_>0}.min
+    val m2 = fretListFold.filter_(r)(_ => true).sorted
+    val span = m2.max - m2.filter{_ > 0}.min
     val result = if (span > 6) {
       val diffs = m2.zip(m2.tail).map{case (x, y)=>scala.math.abs(x-y)}
       val dm = diffs.max
@@ -94,7 +100,7 @@ object Operations {
 
   def fingerings(chord: Chord, fretSpan: Int = 6, jazzVoicing: Boolean = false)(implicit tuning: Tuning): List[FretList] = {
 
-    def transpose(c: FretList) = c.map {_.map {n=>n + retune(tuning)(chord.root)}}
+    def transpose(c: FretList) = fretListFunc.map(c){n=>n + retune(tuning)(chord.root)}
 
     def alteredRoot(c: FretList): Boolean = {
       if (chord.altRootInterval.isDefined) {
@@ -110,8 +116,6 @@ object Operations {
           rootPosition(c.tail)
         }
       }
-
-
 
 //    chord.semitones
 //    .map {Some(_)}
