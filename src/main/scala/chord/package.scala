@@ -1,9 +1,11 @@
 //package chord
 
 import cats._
+
 import scala.language.implicitConversions
 
 package object chord {
+
   type FretList = List[Option[Int]]
   type DegreeList = List[Option[String]]
 
@@ -32,11 +34,16 @@ package object chord {
 
   implicit val degreeListShow: Show[DegreeList] = Show.show(_.map {_.getOrElse("x")}.mkString(" "))
 
+  implicit class StringToFretList(val str: String) extends AnyVal {
+
+    def fl: FretList = str.split(" ").map { case "x" => None; case n: String => Option(n.toInt) }.toList
+  }
+
   private def mapAccidentals(note: String, map: Map[String, Int]) = {
     if (note.endsWith("b") || note.endsWith("♭")) {
-      -1 + map(note(0).toString)
+      -1 + map(note.head.toString)
     } else {
-      1 + map(note(0).toString)
+      1 + map(note.head.toString)
     }
   }
 
