@@ -11,7 +11,7 @@ import scala.annotation.tailrec
 object Operations {
 
   val fretListFold = Foldable[List].compose[Option]
-  val fretListFunc = Functor[List].compose[Option]
+  val listOptFunc = Functor[List].compose[Option]
 
   def generatePermutations(chord: Chord, withRepetition: Boolean = true)(implicit tuning: Tuning): Iterator[FretList] = {
     val semitones = (if (chord.altRoot.isDefined && !chord.semitones.contains(chord.altRootInterval.get)) {
@@ -50,7 +50,7 @@ object Operations {
 
     def raiseStrings(c: FretList): FretList = {
       val max = c.max.get
-      fretListFunc.map(c){n => if (n != max && math.abs(max - n) > math.abs(max - (n + 12))) n + 12 else n}
+      listOptFunc.map(c){n => if (n != max && math.abs(max - n) > math.abs(max - (n + 12))) n + 12 else n}
 //      c.map { case Some(0) => Some(12)
 //      case x => x
 //            }
@@ -74,9 +74,9 @@ object Operations {
 
     val m = fretListFold.filter_(c) { _ => true }
     val r = if (m.min < 0) {
-      fretListFunc.map(c) { x: Int => x + 12 }
+      listOptFunc.map(c) { x: Int => x + 12 }
     } else if (m.min >= 12) {
-      fretListFunc.map(c) { x: Int => x - 12 }
+      listOptFunc.map(c) { x: Int => x - 12 }
     } else {
       c
     }
@@ -100,7 +100,7 @@ object Operations {
 
   def fingerings(chord: Chord, fretSpan: Int = 6, jazzVoicing: Boolean = false)(implicit tuning: Tuning): List[FretList] = {
 
-    def transpose(c: FretList) = fretListFunc.map(c){n=>n + retune(tuning)(chord.root)}
+    def transpose(c: FretList) = listOptFunc.map(c){n=>n + retune(tuning)(chord.root)}
 
     def alteredRoot(c: FretList): Boolean = {
       if (chord.altRootInterval.isDefined) {
@@ -235,4 +235,29 @@ object Operations {
     require (length > 0)
     helper(input, Nil, length)
   }
+
+  def notes(chord: Chord)(frets: FretList) = {
+    val scale = CircleOfFifths.majorScale(chord.root)
+
+    def applyAccidental(n: String, d: String): String = {
+      println(s"$n, $d")
+      if (hasAccidental(d)) {
+        if (n.length == 1) n + d.head else {
+          if (d.head.toString != n.tail) n.head.toString 
+          else if (n.tail == "#") n.head + "\uD834\uDD2A"  else n.head + "\uD834\uDD2B"
+        }
+      } else n
+    }
+
+
+    listOptFunc.map(chord.asDegrees(frets)){d => scale( d match {
+      case "R" => 0 
+      case n:String => 
+        def f(n: Int) = if (n < 8) n - 1 else n % 8
+        if (hasAccidental(n)) f(n.tail.toInt) else f(n.toInt)
+    })}.zip(chord.asDegrees(frets)).map{p => 
+    if (p._1.isDefined) Some(applyAccidental(p._1.get, p._2.get)) else p._1
+    }}
+  
+  
 }
