@@ -78,6 +78,8 @@ package object chord {
     map.withDefault(n=>revMapAccidentals(n, map, preferSharps))
   }
 
+  def hasAccidental(n: String) = "♭b♯#".toSet(n.head)
+
   def norm(x: Int): Int = (x + 12) % 12
 
   //converts a space delimited string into a list, eliminating extraneous whitespace
