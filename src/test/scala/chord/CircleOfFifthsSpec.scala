@@ -2,7 +2,7 @@ package chord
 
 import org.scalatest._
 
-class CircleOfFifthsSpec extends FlatSpec with ShouldMatchers {
+class CircleOfFifthsSpec extends FlatSpec {
 
 	"CircleOfFifths" should "find relative minor key" in {
         assert(CircleOfFifths.relativeMinor("C") == "A")

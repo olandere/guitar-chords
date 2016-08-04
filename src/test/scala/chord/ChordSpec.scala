@@ -6,7 +6,7 @@ import cats.implicits._
 /**
  * Created by eolander on 1/4/15.
  */
-class ChordSpec extends FlatSpec with ShouldMatchers {
+class ChordSpec extends FlatSpec {
 
   "A chord" should "have correct semitones" in {
     assert(Chord("Gdim7").semitones == List(0,3,6,9))

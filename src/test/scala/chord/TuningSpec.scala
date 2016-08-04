@@ -5,7 +5,7 @@ import org.scalatest._
 /**
  * Created by eolander on 2/25/15.
  */
-class TuningSpec extends FlatSpec with ShouldMatchers {
+class TuningSpec extends FlatSpec {
 
   "A tuning" should "not case about case" in {
     val t = Tuning("a b c d e")

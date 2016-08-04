@@ -9,7 +9,7 @@ settings(
   libraryDependencies ++= Seq(
     "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
     "org.clapper" %% "grizzled-slf4j" % "1.0.2",
-    "org.scalatest" %% "scalatest" % "2.2.6" % "test",
+    "org.scalatest" %% "scalatest" % "3.0.0" % "test",
     "org.scalacheck" %% "scalacheck" % "1.13.0" % "test",
     "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
     "org.typelevel" %% "cats" % "0.6.1"
