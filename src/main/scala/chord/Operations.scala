@@ -236,28 +236,26 @@ object Operations {
     helper(input, Nil, length)
   }
 
-  def notes(chord: Chord)(frets: FretList) = {
+  def notes(chord: Chord)(frets: FretList): List[Option[String]] = {
     val scale = CircleOfFifths.majorScale(chord.root)
 
     def applyAccidental(n: String, d: String): String = {
       println(s"$n, $d")
       if (hasAccidental(d)) {
         if (n.length == 1) n + d.head else {
-          if (d.head.toString != n.tail) n.head.toString 
+          if (d.head.toString != n.tail) n.head.toString
           else if (n.tail == "#") n.head + "\uD834\uDD2A"  else n.head + "\uD834\uDD2B"
         }
       } else n
     }
 
-
     listOptFunc.map(chord.asDegrees(frets)){d => scale( d match {
-      case "R" => 0 
-      case n:String => 
+      case "R" => 0
+      case n:String =>
         def f(n: Int) = if (n < 8) n - 1 else n % 8
         if (hasAccidental(n)) f(n.tail.toInt) else f(n.toInt)
-    })}.zip(chord.asDegrees(frets)).map{p => 
+    })}.zip(chord.asDegrees(frets)).map{p =>
     if (p._1.isDefined) Some(applyAccidental(p._1.get, p._2.get)) else p._1
     }}
-  
-  
+
 }

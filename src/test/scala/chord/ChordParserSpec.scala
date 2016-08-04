@@ -5,7 +5,7 @@ import org.scalatest._
 /**
   * Created by eolander on 4/23/16.
   */
-class ChordParserSpec extends FlatSpec with ShouldMatchers {
+class ChordParserSpec extends FlatSpec {
 
   "ChordParser" should "recognize power chords" in {
     ChordParser("A5")

@@ -5,7 +5,7 @@ import org.scalatest._
 /**
   * Created by eolander on 4/23/16.
   */
-class TuningParserSpec extends FlatSpec with ShouldMatchers {
+class TuningParserSpec extends FlatSpec {
 
   "The tuning parser" should "not care about spacing" in {
     assert(TuningParser("D A D G A D") == Tuning.DADGAD)

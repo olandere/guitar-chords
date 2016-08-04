@@ -1,13 +1,13 @@
 package chord
 
 import chord.Operations._
-import org.scalatest.{FlatSpec, ShouldMatchers}
+import org.scalatest._
 import cats.implicits._
 
 /**
  * Created by eolander on 12/28/14.
  */
-class OperationsSpec extends FlatSpec with ShouldMatchers {
+class OperationsSpec extends FlatSpec with Matchers {
 
   "Fingerings" should "generate known fingerings" in {
 

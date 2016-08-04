@@ -1,13 +1,13 @@
 package chord
 
 import chord.Operations._
-import org.scalatest._
 import cats.implicits._
+import org.scalatest._
 
 /**
  * Created by eolander on 2/17/15.
  */
-class ChordNamerSpec extends FlatSpec with ShouldMatchers {
+class ChordNamerSpec extends FlatSpec {
 
   "ChordNamer" should "identify chords" in {
     //assert(ChordNamer(chords("1 3 3 1 1 1")) == "m")
