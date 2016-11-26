@@ -1,7 +1,7 @@
 package chord
 
-import chord.Operations._
 import cats.implicits._
+import chord.Operations._
 import org.scalatest._
 
 /**

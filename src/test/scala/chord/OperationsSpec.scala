@@ -1,8 +1,8 @@
 package chord
 
+import cats.implicits._
 import chord.Operations._
 import org.scalatest._
-import cats.implicits._
 
 /**
  * Created by eolander on 12/28/14.
