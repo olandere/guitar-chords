@@ -13,5 +13,12 @@ class ChordParserSpec extends FlatSpec {
 
   it should "recognize lists of chords" in {
     ChordParser("E A B5 Dm7")
+    ChordParser("C/G,G,D/A,A5")
   }
+
+  it should "handle slash chords" in {
+    ChordParser("D/A")
+  }
+
+
 }
