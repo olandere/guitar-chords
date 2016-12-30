@@ -179,5 +179,18 @@ class OperationsSpec extends FlatSpec with Matchers {
     assert(fingerings(c, 4).map{f : FretList => c.asDegrees(f)}.forall(_.contains(Some("13"))))
   }
 
+  it should "handle power chords in altered tunings" in {
+    implicit val tuning = Tuning("G D A E")
+    val a5 = Chord("A5")
+    assert(fingerings(a5, 4).length > 0)
+    assert(fingerings(a5, 4).map{_.show}.contains("2 2 0 0"))
+  }
+
+  it should "handle root position chords with shell voicings" in {
+    val aM7 = new ShellChord(Chord("AM9")) with RootPosition
+    assert(fingerings(aM7, 4).map{_.show}.contains("5 4 6 4 x x"))
+    assert(!fingerings(aM7, 4).map{_.show}.contains("4 x 6 6 0 5"))
+  }
+
 
 }

@@ -166,9 +166,20 @@ object Operations {
     helper(chords.tail, chords.head, List()).filter(withinSpan(fretSpan))
   }
 
-  def chords(chord: String)(implicit tuning: Tuning) = {
+  /**
+    *
+    * @param chord chord fingering - "x x 0 2 3 2"
+    * @param tuning
+    * @return
+    */
+  def chords(chord: String)(implicit tuning: Tuning): (List[String], String, List[Option[String]]) = {
     def getRoot(fl: FretList, tuning: List[Int]): Int = {
-      if (fl.head.isDefined) {norm(fl.head.get+tuning.head)} else {getRoot(fl.tail, tuning.tail)}
+      if (fl.head.isDefined) {
+        norm(fl.head.get + tuning.head)
+      }
+      else {
+        getRoot(fl.tail, tuning.tail)
+      }
     }
 
     def intervals(fl: FretList, root: Int) = {
@@ -179,10 +190,10 @@ object Operations {
     println(ints)
     val namer = ChordNamer(chord)//, ints.map{_.toList}.flatten)
     println(s"$namer")
-    (namer.intervals map (_.map(SEMI_TO_INT).getOrElse("x")), namer.toString)//.mkString(" ")
+    (namer.intervals map (_.map(SEMI_TO_INT).getOrElse("x")), namer.toString, notes(Chord(namer.toString))(fl))//.mkString(" ")
   }
 
-  def progression(chords: List[Chord], fretSpan: Int)(implicit tuning: Tuning): List[List[FretList]] = {
+  def progression(chords: List[Chord], fretSpan: Int, jazzVoicing: Boolean = false)(implicit tuning: Tuning): List[List[FretList]] = {
 
     def proximitySort(f: FretList, fl: List[FretList]): List[FretList] = {
       fl.map{fi => (fi, diff(f, fi))}.sortBy{_._2}.map{_._1}
@@ -195,7 +206,7 @@ object Operations {
       }
     }
 
-    val fingeringList = chords.map{c=>fingerings(c, fretSpan)}
+    val fingeringList = chords.map{c=>fingerings(c, fretSpan, jazzVoicing)}
     fingeringList.head.map{c => helper(c, fingeringList.tail)}
 
     // initially 2 chords only
@@ -232,7 +243,7 @@ object Operations {
         (if (inSet.length > 1) helper(inSet.tail, result, len) else Nil)
       }
     }
-    require (length > 0)
+    require (length >= 0, s"length: $length")
     helper(input, Nil, length)
   }
 

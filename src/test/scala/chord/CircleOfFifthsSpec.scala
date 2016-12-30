@@ -19,5 +19,6 @@ class CircleOfFifthsSpec extends FlatSpec {
 		assert(CircleOfFifths.majorScale("G").mkString == "GABCDEF#")
 		assert(CircleOfFifths.majorScale("D").mkString == "DEF#GABC#")
 		assert(CircleOfFifths.majorScale("C").mkString == "CDEFGAB")
+		assert(CircleOfFifths.majorScale("G#").mkString == "G#A#B#C#D#E#F\uD834\uDD2A")
 	}
 }

@@ -1,10 +1,10 @@
 lazy val root = (project in file(".")).
 settings(
   name := "chords",
-  organization <<= name,
+  organization := "chords",
   version := "1.0",
-  scalaVersion := "2.12.0",
-  scalacOptions ++= Seq("-deprecation", "-optimise", "-feature"),
+  scalaVersion := "2.12.1",
+  scalacOptions ++= Seq("-deprecation", "-feature"),
 
   libraryDependencies ++= Seq(
     "ch.qos.logback" % "logback-classic" % "1.1.3" % "runtime",
