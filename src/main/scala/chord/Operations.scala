@@ -1,6 +1,6 @@
 package chord
 
-import cats.{Functor, Foldable}
+import cats.{Foldable, Functor}
 import cats.implicits._
 
 import scala.annotation.tailrec
@@ -86,12 +86,12 @@ object Operations {
       val diffs = m2.zip(m2.tail).map{case (x, y)=>scala.math.abs(x-y)}
       val dm = diffs.max
       if (dm == diffs.head) { //outlier is lowest note, need to raise it
-      val r1 = r.map {_.map{n => if (n == m2.min) n+12 else n}}
+      val r1 = listOptFunc.map(r){n => if (n == m2.min) n+12 else n}
         if (r1.filter {_.isDefined}.map {_.get}.min >= 12) {
-          r1.map {_.map { x: Int => x - 12}}
+          listOptFunc.map(r1){ x: Int => x - 12}
         } else r1
       } else { // outlier is highest note, need to lower it
-        r.map {_.map{n => if (n == m2.max && n > 11) n-12 else n}}
+        listOptFunc.map(r){n => if (n == m2.max && n > 11) n-12 else n}
       }
     } else r
 //    println(s"$c, $result")
@@ -187,9 +187,9 @@ object Operations {
     }
     val fl = Chord.unapply(chord)
     val ints = intervals(fl, getRoot(fl, tuning.semitones))
-    println(ints)
+    //println(ints)
     val namer = ChordNamer(chord)//, ints.map{_.toList}.flatten)
-    println(s"$namer")
+    //println(s"$namer")
     (namer.intervals map (_.map(SEMI_TO_INT).getOrElse("x")), namer.toString, notes(Chord(namer.toString))(fl))//.mkString(" ")
   }
 
@@ -248,16 +248,20 @@ object Operations {
   }
 
   def notes(chord: Chord)(frets: FretList): List[Option[String]] = {
-    val scale = CircleOfFifths.majorScale(chord.root)
+    val scale = CircleOfFifths.majorScale(Note(chord.root))
 
     def applyAccidental(n: String, d: String): String = {
+      val note = Note(n)
+      val degree = Degree(d)
       println(s"$n, $d")
-      if (hasAccidental(d)) {
-        if (n.length == 1) n + d.head else {
-          if (d.head.toString != n.tail) n.head.toString
-          else if (n.tail == "#") n.head + "\uD834\uDD2A"  else n.head + "\uD834\uDD2B"
-        }
-      } else n
+      degree.adjust(note).toString
+
+//      if (hasAccidental(d)) {
+//        if (n.length == 1) n + d.head else {
+//          if (d.head.toString != n.tail) n.head.toString
+//          else if (n.tail == "#") n.head + DOUBLE_SHARP else n.head + DOUBLE_FLAT
+//        }
+//      } else n
     }
 
     listOptFunc.map(chord.asDegrees(frets)){d => scale( d match {
