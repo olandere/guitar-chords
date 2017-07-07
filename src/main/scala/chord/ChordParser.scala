@@ -25,7 +25,7 @@ trait ChordParser extends RegexParsers {
 
   val operation = """""".r ^^ {_.toString}
 
-  val chord: Parser[Chord] = root ~ triad.? ~ quality.? ~ ext.? ~ addedNote.? ~ alteration.* ~ suspension.? ~ altRoot.? ^^ {
+  val chord: Parser[Chord] = root ~ triad.? ~ quality.? ~ ext.? ~ addedNote.* ~ alteration.* ~ suspension.? ~ altRoot.? ^^ {
     case r~t~q~e~ad~al~sus~ar => Chord(r, t, e, q, al, ad, sus, ar)
   }
 
