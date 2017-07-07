@@ -9,6 +9,9 @@ package object chord {
   type FretList = List[Option[Int]]
   type DegreeList = List[Option[String]]
 
+  val DOUBLE_FLAT = "\uD834\uDD2B"
+  val DOUBLE_SHARP = "\uD834\uDD2A"
+
   implicit val fretListShow: Show[FretList] = Show.show(_.map {_.getOrElse("x")}.mkString(" "))
 
   implicit val fretListOrder: Order[FretList] = new Order[FretList] {
@@ -78,7 +81,7 @@ package object chord {
     map.withDefault(n=>revMapAccidentals(n, map, preferSharps))
   }
 
-  def hasAccidental(n: String) = "♭b♯#".toSet(n.head)
+  def hasAccidental(n: String): Boolean = "♭b♯#°".toSet(n.head)
 
   def norm(x: Int): Int = (x + 12) % 12
 
@@ -87,18 +90,17 @@ package object chord {
 
   def diff(a: FretList, b: FretList): Int = {
     val shift = math.max(math.abs(a.max.get - b.filter{v => v.isDefined && v.get > 0}.min.get), math.abs(b.max.get - a.filter{v => v.isDefined && v.get > 0}.min.get))
-    a.zip(b).map { e =>
-      e match {
-        case (None, None) => 0
-        case (Some(0), Some(0)) => 0
-        case (None, Some(0)) => 0
-        case (Some(0), None) => 0
-        case (None, Some(_)) => 1
-        case (Some(_), None) => 1
-        case (Some(_), Some(0)) => 1
-        case (Some(0), Some(_)) => 1
-        case _ =>
-          math.abs(e._1.get - e._2.get)
-      }}.sum + shift
+    a.zip(b).map {
+      case (None, None) => 0
+      case (Some(0), Some(0)) => 0
+      case (None, Some(0)) => 0
+      case (Some(0), None) => 0
+      case (None, Some(_)) => 1
+      case (Some(_), None) => 1
+      case (Some(_), Some(0)) => 1
+      case (Some(0), Some(_)) => 1
+      case e =>
+        math.abs(e._1.get - e._2.get)
+    }.sum + shift
   }
 }
