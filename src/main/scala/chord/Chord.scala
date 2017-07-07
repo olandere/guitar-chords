@@ -4,7 +4,7 @@
 package chord
 
 class Chord(val root: String, val triad: String, val quality: String, val extension: Int,
-            val alteration: String, val added: Option[String], val suspension: Option[String], val altRoot: Option[String]) {
+            val alteration: String, val added: List[String], val suspension: Option[String], val altRoot: Option[String]) {
 
   def this(c: Chord) = {
     this(c.root, c.triad, c.quality, c.extension, c.alteration, c.added, c.suspension, c.altRoot)
@@ -90,7 +90,7 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
       extensions
     } else {
       Nil
-  }) ++ added.map(a=>List(a)).getOrElse(Nil)
+  }) ++ added
     performSuspensions(performAlterations(ints))
   }
 
@@ -161,13 +161,13 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
                       }
   }
 
-  //	 def diff(c: Chord, fretSpan: Int):Int = {
-  //	 		for {
-  // 		  c1 <- allChords(fretSpan)
-  // 		  c2 <- c.allChords(fretSpan)
-  // 		  diff()
-  // 		}
-  // 	}
+//  def diff(c: Chord, fretSpan: Int): Int = {
+//    for {
+//      c1 <- allChords(fretSpan)
+//      c2 <- c.allChords(fretSpan)
+//      diff()
+//    }
+//  }
 
   def asShell: ShellChord = new ShellChord(this)
 
@@ -189,19 +189,19 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
         case c => c
       })
     }
-    root + q + (if (extension > 0) extension.toString else "") + added.fold(""){a=>s"add$a"} + alteration +
+    root + q + (if (extension > 0) extension.toString else "") + added.fold(""){(r, a)=>r + s"add$a"} + alteration +
     suspension.fold(""){s=>s"sus$s"} +
     altRoot.map(r => s"/$r").getOrElse("")
   }
 }
 
-object InvalidChord extends Chord("", "", "", 0, "", None, None, None) {
+object InvalidChord extends Chord("", "", "", 0, "", Nil, None, None) {
   override lazy val semitones = Nil
   override def intervals(extensions: => List[String]): List[String] = Nil
   override def isValid: Boolean = false
 }
 
-class PowerChord(val r: String) extends Chord(r, "", "", 0, "", None, None, None) {
+class PowerChord(val r: String) extends Chord(r, "", "", 0, "", Nil, None, None) {
 
   override lazy val semitones: List[Int] = List(0, 7, 0)
 
@@ -330,7 +330,7 @@ object Chord {
 //        }.getOrElse(InvalidChord))
   }
 
-  def apply(r: String, t: Option[String], e:Option[String],q:Option[String],al:List[String],ad:Option[String],sus:Option[String],ar:Option[String]): Chord ={
+  def apply(r: String, t: Option[String], e:Option[String],q:Option[String],al:List[String],ad:List[String],sus:Option[String],ar:Option[String]): Chord ={
     new Chord(r, triad(t), seventh(t, q), e.getOrElse("0").toInt, al.mkString(""),
               ad,sus,ar)
   }

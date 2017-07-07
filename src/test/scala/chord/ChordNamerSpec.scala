@@ -61,6 +61,7 @@ class ChordNamerSpec extends FlatSpec {
     assert(ChordNamer("x 3 4 0 3 0").toString == "Cadd9♯11")
     assert(ChordNamer("x 3 3 2 3 x").toString == "Dm7")
     assert(ChordNamer("x 3 4 2 3 x").toString == "D7")
+    assert(ChordNamer("x 3 4 5 4 x").toString == "Cdim")
     assert(ChordNamer("x321xx").toString == "C+")
   }
 
@@ -72,6 +73,11 @@ class ChordNamerSpec extends FlatSpec {
   it should "name chords in altered tunings with accidentals" in {
     implicit val tuning = Tuning("C# G# C# G# C# E")
     assert(ChordNamer("xx3004").toString == "C♯m")
+  }
+
+  it should "name unusual chords in ukulele tuning" in {
+    implicit val tuning = TuningParser("GCEA")
+    assert(ChordNamer("2 0 2 3").toString == "F♯dim")
   }
 
   it should "name all inversions" in {
@@ -86,5 +92,9 @@ class ChordNamerSpec extends FlatSpec {
 
     val am7b5 = Chord("Am7♭5")
     assert(fingerings(am7b5, 5).forall { c => Set("Am7♭5", "Cm6")(ChordNamer(c.show).toString) })
+  }
+
+  it should "handle jimi hendrix chord" in {
+    assert(ChordNamer("x7678x").toString == "E7♯9")
   }
 }
