@@ -20,5 +20,9 @@ class ChordParserSpec extends FlatSpec {
     ChordParser("D/A")
   }
 
+  it should "handle multiple adds" in {
+    ChordParser("Gadd9add11")
+  }
+
 
 }

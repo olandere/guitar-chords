@@ -166,11 +166,15 @@ class OperationsSpec extends FlatSpec with Matchers {
   it should "name notes in chords" in {
     val E = Chord("E")
     val eNotes = notes(E)(_)
-    assert(fingerings(E).map{eNotes}.map{_.show}.contains("E B E G# B E"))
+    assert(fingerings(E).map{eNotes}.map{_.show}.contains("E B E G♯ B E"))
 
     val DM9 = Chord("DM9")
     val dNotes = notes(DM9)(_)
-    assert(fingerings(DM9).map{dNotes}.map{_.show}.contains("E A D A C# F#"))
+    assert(fingerings(DM9).map{dNotes}.map{_.show}.contains("E A D A C♯ F♯"))
+
+    val Cdim7 = Chord("Cdim7")
+    val cNotes = notes(Cdim7)(_)
+    assert(fingerings(Cdim7).map{cNotes}.map{_.show}.contains("x C E♭ B\uD834\uDD2B x G♭"))
   }
 
   it should "handle chords with more tones than strings" in {
@@ -192,5 +196,10 @@ class OperationsSpec extends FlatSpec with Matchers {
     assert(!fingerings(aM7, 4).map{_.show}.contains("4 x 6 6 0 5"))
   }
 
+  it should "name notes from fingering" in {
+    //chords("6x776x")
+    chords("097000")
+//    chords("x01x12")
+  }
 
 }

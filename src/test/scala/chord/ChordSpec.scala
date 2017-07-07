@@ -73,6 +73,10 @@ class ChordSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyCheck
     assert(Chord("Gadd11").asShell.semitones == List(0, 4, 5))
   }
 
+  it should "handle multiple adds" in {
+    assert(Chord("Gadd9add11").semitones == List(0, 4, 7, 2, 5))
+  }
+
   it should "handle banjo chords" in {
     implicit val tuning = Tuning("D G B D")
     val c = Chord("C")
