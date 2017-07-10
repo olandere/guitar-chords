@@ -190,7 +190,9 @@ object Operations {
     //println(ints)
     val namer = ChordNamer(chord)//, ints.map{_.toList}.flatten)
     //println(s"$namer")
-    (namer.intervals map (_.map(SEMI_TO_INT).getOrElse("x")), namer.toString, notes(Chord(namer.toString))(fl))//.mkString(" ")
+    (namer.intervals map (_.map(if (namer.isDiminishedSeventh) SEMI_TO_INT + (9 -> "°7") else SEMI_TO_INT).getOrElse("x")),
+      namer.toString,
+      notes(Chord(namer.toString))(fl))//.mkString(" ")
   }
 
   def progression(chords: List[Chord], fretSpan: Int, jazzVoicing: Boolean = false)(implicit tuning: Tuning): List[List[FretList]] = {
