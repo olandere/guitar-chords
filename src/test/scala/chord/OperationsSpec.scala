@@ -199,7 +199,7 @@ class OperationsSpec extends FlatSpec with Matchers {
   it should "name notes from fingering" in {
     //chords("6x776x") should matchPattern { case (_, "B♭M7", _) => }
     chords("097000") should matchPattern { case (_, "Emadd9add11", _) => }
-    chords("x01x12") should matchPattern { case (_, "Adim7", _) => }
+    chords("x01x12") should matchPattern { case (List("x", "R", "♭5", "x", "♭3", "°7"), "Adim7", _) => }
   }
 
 }
