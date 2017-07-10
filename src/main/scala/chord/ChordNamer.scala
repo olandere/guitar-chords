@@ -101,7 +101,7 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning) exten
 
   private def addedIntervals: String = {
     if (!has7) {
-      (if (has13) {if (!has7) "6" else "13"} else "") +
+      (if (has13 && !isDiminishedSeventh) {if (!has7) "6" else "13"} else "") +
       (if (has9 && !no3rd) "add9" else "") +
       (if (has11 && !no3rd) "add11" else "")
     } else ""

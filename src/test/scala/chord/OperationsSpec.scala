@@ -11,48 +11,48 @@ class OperationsSpec extends FlatSpec with Matchers {
 
   "Fingerings" should "generate known fingerings" in {
 
-    assert(fingerings(Chord("E-9").asShell, 3).map{_.show}.contains("x 7 5 7 7 x"))
-    assert(fingerings(Chord("D-9").asShell, 3).map{_.show}.contains("x 5 3 5 5 x"))
-    assert(fingerings(Chord("FM7"), 4).map{_.show}.contains("x x 3 2 1 0"))
-    assert(fingerings(Chord("AM7"), 4).map{_.show}.contains("x x 7 6 5 4"))
-    assert(fingerings(Chord("BM7"), 4).map{_.show}.contains("7 x 8 8 7 x"))
-    assert(fingerings(Chord("A"), 3).map{_.show}.contains("0 x x 6 x 5"))
+    fingerings(Chord("E-9").asShell, 3).map{_.show} should contain("x 7 5 7 7 x")
+    fingerings(Chord("D-9").asShell, 3).map{_.show} should contain("x 5 3 5 5 x")
+    fingerings(Chord("FM7"), 4).map{_.show} should contain("x x 3 2 1 0")
+    fingerings(Chord("AM7"), 4).map{_.show} should contain("x x 7 6 5 4")
+    fingerings(Chord("BM7"), 4).map{_.show} should contain("7 x 8 8 7 x")
+    fingerings(Chord("A"), 3).map{_.show} should contain("0 x x 6 x 5")
 
     assert(fingerings(Chord("E"), 4).forall(c => c.forall(_.forall(_>=0))))
   }
 
   it should "handle banjo chords" in {
     implicit val tuning = Tuning("D G B D")
-    assert(fingerings(Chord("A"), 4).map{_.show}.contains("x 2 2 2"))
-    assert(fingerings(Chord("E7").asShell, 4).map{_.show}.contains("x 1 3 2"))
+    fingerings(Chord("A"), 4).map{_.show} should contain("x 2 2 2")
+    fingerings(Chord("E7").asShell, 4).map{_.show} should contain("x 1 3 2")
     assert(fingerings(Chord("C"), 6, true).map{_.show}.forall(c=>c.exists(_=='x')))  //todo: should have exactly one 'x'
   }
 
   it should "handle slash chords" in {
-    assert(fingerings(Chord("A/D"), 4).map{_.show}.contains("x x 12 9 10 9"))
+    fingerings(Chord("A/D"), 4).map{_.show} should contain("x x 12 9 10 9")
   }
 
   it should "understand add 9 chords" in {
-    assert(fingerings(Chord("Cadd9"), 4).map{_.show}.contains("x 3 2 0 3 x"))
-    assert(fingerings(Chord("Cmadd9"), 4).map{_.show}.contains("x 3 1 0 3 x"))
-    assert(fingerings(Chord("C6add9"), 4).map{_.show}.contains("x 3 2 0 3 5"))
+    fingerings(Chord("Cadd9"), 4).map{_.show} should contain("x 3 2 0 3 x")
+    fingerings(Chord("Cmadd9"), 4).map{_.show} should contain("x 3 1 0 3 x")
+    fingerings(Chord("C6add9"), 4).map{_.show} should contain("x 3 2 0 3 5")
   }
 
   it should "understand add 11 chords" in {
-    assert(fingerings(Chord("Cadd11"), 4).map{_.show}.contains("x 3 3 0 5 x"))
-    assert(fingerings(Chord("Cmadd11"), 4).map{_.show}.contains("x 3 3 x 4 3"))
-    assert(fingerings(Chord("C6add11"), 4).map{_.show}.contains("x 3 3 0 5 5"))
+    fingerings(Chord("Cadd11"), 4).map{_.show} should contain("x 3 3 0 5 x")
+    fingerings(Chord("Cmadd11"), 4).map{_.show} should contain("x 3 3 x 4 3")
+    fingerings(Chord("C6add11"), 4).map{_.show} should contain("x 3 3 0 5 5")
   }
 
   it should "understand 13 chords" in {
     val c = Chord("C13")
-    assert(fingerings(c, 4).map{_.show}.contains("3 3 5 3 5 5"))
+    fingerings(c, 4).map{_.show} should contain("3 3 5 3 5 5")
 
     assert(fingerings(c, 4).map{f : FretList => c.asDegrees(f)}.forall(_.contains(Some("13"))))
   }
 
   it should "unfortunately, handle power chords" in {
-    assert(fingerings(Chord("A5"), 4).map{_.show}.contains("5 7 7 x x x"))
+    fingerings(Chord("A5"), 4).map{_.show} should contain("5 7 7 x x x")
   }
 
   it should "analyze fingerings" in {
@@ -70,16 +70,16 @@ class OperationsSpec extends FlatSpec with Matchers {
 
   it should "handle root position filter" in {
     val aM7 = new Chord(Chord("AM7")) with RootPosition
-    assert(fingerings(aM7, 4).map{_.show}.contains("x x 7 6 5 4"))
+    fingerings(aM7, 4).map{_.show} should contain("x x 7 6 5 4")
   }
 
   it should "handle drop2 position filter" in {
     val cM7 = new Chord(Chord("CM7")) with Drop2
-    assert(fingerings(cM7, 4).map{_.show}.contains("3 3 2 4 x x"))
-    assert(fingerings(cM7, 4).size == 12)
+    fingerings(cM7, 4).map{_.show} should contain("3 3 2 4 x x")
+    fingerings(cM7, 4) should have size 12
 
     val c7 = new Chord(Chord("C7")) with Drop2
-    assert(fingerings(c7, 4).size == 12)
+    fingerings(c7, 4) should have size 12
   }
 
   it should "have correct drop2 fingerings" in {
@@ -88,26 +88,26 @@ class OperationsSpec extends FlatSpec with Matchers {
     val voicing2to5 = Set("x 10 10 9 11 x", "x 1 2 0 1 x", "x 3 5 3 5 x", "x 7 8 5 8 x")
     val voicing1to4 = Set("x x 5 5 5 6", "x x 8 9 8 8", "x x 10 12 11 12", "x x 2 3 1 3")
 //    println(fingerings(c7, 4).map{_.show})
-    fingerings(c7, 5).map{_.show}.toSet.intersect(voicing3to6) should be (voicing3to6)
-    assert(fingerings(c7, 4).map{_.show}.toSet.intersect(voicing2to5) == voicing2to5)
-    assert(fingerings(c7, 4).map{_.show}.toSet.intersect(voicing1to4) == voicing1to4)
+    fingerings(c7, 5).map{_.show}.toSet.intersect(voicing3to6) shouldBe voicing3to6
+    fingerings(c7, 4).map{_.show}.toSet.intersect(voicing2to5) shouldBe voicing2to5
+    fingerings(c7, 4).map{_.show}.toSet.intersect(voicing1to4) shouldBe voicing1to4
   }
 
   it should "handle drop2and4 position filter" in {
     println("handle drop2and4 position filter")
     val dbM7 = new Chord(Chord("DbM7")) with Drop2and4
-    assert(fingerings(dbM7, 5).map{_.show}.contains("4 4 x 5 6 x"))
+    fingerings(dbM7, 5).map{_.show} should contain("4 4 x 5 6 x")
    // println("DbM7")
     //fingerings(dbM7, 5).foreach{c=>println(c.show)}
-    assert(fingerings(dbM7, 5).size == 8)
+    fingerings(dbM7, 5) should have size 8
 
     val c7 = new Chord(Chord("C7")) with Drop2and4
-    assert(fingerings(c7, 4).size == 8)
+    fingerings(c7, 4) should have size 8
   //  println("C7")
    // fingerings(c7, 5).foreach{c=>println(c.show)}
 
     val cM7 = new Chord(Chord("CM7")) with Drop2and4
-    assert(fingerings(cM7, 5).size == 9)
+    fingerings(cM7, 5) should have size 9
    // println("CM7")
    // fingerings(cM7, 5).foreach{c=>println(c.show)}
   }
@@ -154,27 +154,27 @@ class OperationsSpec extends FlatSpec with Matchers {
   }
 
   it should "correctly adjust octaves" in {
-    assert(adjustOctave2(Chord.unapply("x 7 8 17 8 x")) == Chord.unapply("x 7 8 5 8 x"))
-    assert(adjustOctave2(Chord.unapply("x 19 8 17 8 x")) == Chord.unapply("x 7 8 5 8 x"))
+    adjustOctave2(Chord.unapply("x 7 8 17 8 x")) shouldEqual Chord.unapply("x 7 8 5 8 x")
+    adjustOctave2(Chord.unapply("x 19 8 17 8 x")) shouldEqual Chord.unapply("x 7 8 5 8 x")
   }
 
   it should "generate barre chords" in {
-    assert(fingerings(Chord("E")).map{_.show}.contains("0 2 2 1 0 0"))
-    assert(fingerings(Chord("Am")).map{_.show}.contains("x 0 2 2 1 0"))
+    fingerings(Chord("E")).map{_.show} should contain("0 2 2 1 0 0")
+    fingerings(Chord("Am")).map{_.show} should contain("x 0 2 2 1 0")
   }
 
   it should "name notes in chords" in {
     val E = Chord("E")
     val eNotes = notes(E)(_)
-    assert(fingerings(E).map{eNotes}.map{_.show}.contains("E B E G♯ B E"))
+    fingerings(E).map{eNotes}.map{_.show} should contain("E B E G♯ B E")
 
     val DM9 = Chord("DM9")
     val dNotes = notes(DM9)(_)
-    assert(fingerings(DM9).map{dNotes}.map{_.show}.contains("E A D A C♯ F♯"))
+    fingerings(DM9).map{dNotes}.map{_.show} should contain("E A D A C♯ F♯")
 
     val Cdim7 = Chord("Cdim7")
     val cNotes = notes(Cdim7)(_)
-    assert(fingerings(Cdim7).map{cNotes}.map{_.show}.contains("x C E♭ B\uD834\uDD2B x G♭"))
+    fingerings(Cdim7).map{cNotes}.map{_.show} should contain("x C E♭ B\uD834\uDD2B x G♭")
   }
 
   it should "handle chords with more tones than strings" in {
@@ -186,20 +186,20 @@ class OperationsSpec extends FlatSpec with Matchers {
   it should "handle power chords in altered tunings" in {
     implicit val tuning = Tuning("G D A E")
     val a5 = Chord("A5")
-    assert(fingerings(a5, 4).length > 0)
-    assert(fingerings(a5, 4).map{_.show}.contains("2 2 0 0"))
+    fingerings(a5, 4) should not be empty
+    fingerings(a5, 4).map{_.show} should contain("2 2 0 0")
   }
 
   it should "handle root position chords with shell voicings" in {
     val aM7 = new ShellChord(Chord("AM9")) with RootPosition
-    assert(fingerings(aM7, 4).map{_.show}.contains("5 4 6 4 x x"))
-    assert(!fingerings(aM7, 4).map{_.show}.contains("4 x 6 6 0 5"))
+    fingerings(aM7, 4).map{_.show} should contain("5 4 6 4 x x")
+    fingerings(aM7, 4).map{_.show} should not contain("4 x 6 6 0 5")
   }
 
   it should "name notes from fingering" in {
-    //chords("6x776x")
-    chords("097000")
-//    chords("x01x12")
+    //chords("6x776x") should matchPattern { case (_, "B♭M7", _) => }
+    chords("097000") should matchPattern { case (_, "Emadd9add11", _) => }
+    chords("x01x12") should matchPattern { case (_, "Adim7", _) => }
   }
 
 }
