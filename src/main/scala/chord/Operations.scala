@@ -170,7 +170,7 @@ object Operations {
     *
     * @param chord chord fingering - "x x 0 2 3 2"
     * @param tuning
-    * @return
+    * @return (degrees, name, notes)
     */
   def chords(chord: String)(implicit tuning: Tuning): (List[String], String, List[Option[String]]) = {
     def getRoot(fl: FretList, tuning: List[Int]): Int = {
