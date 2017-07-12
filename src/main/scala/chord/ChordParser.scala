@@ -23,7 +23,7 @@ trait ChordParser extends RegexParsers {
 
   val sep:Parser[String] = """,|;|:|\s*""".r
 
-  val operation = """""".r ^^ {_.toString}
+ // val operation = """""".r ^^ {_.toString}
 
   val chord: Parser[Chord] = root ~ triad.? ~ quality.? ~ ext.? ~ addedNote.* ~ alteration.* ~ suspension.? ~ altRoot.? ^^ {
     case r~t~q~e~ad~al~sus~ar => Chord(r, t, e, q, al, ad, sus, ar)
@@ -33,7 +33,7 @@ trait ChordParser extends RegexParsers {
     case r => new PowerChord(r)
   }
 
-  val chordList = repsep(powerChord | chord, sep)
+  val chordList: Parser[List[Chord]] = repsep(powerChord | chord, sep)
 
 }
 

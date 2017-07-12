@@ -7,7 +7,8 @@ import scala.language.implicitConversions
 package object chord {
 
   type FretList = List[Option[Int]]
-  type DegreeList = List[Option[String]]
+  type DegreeList = List[Option[Degree]]
+  type NoteList = List[Option[Note]]
 
   val DOUBLE_FLAT = "\uD834\uDD2B"
   val DOUBLE_SHARP = "\uD834\uDD2A"
@@ -36,6 +37,8 @@ package object chord {
   }
 
   implicit val degreeListShow: Show[DegreeList] = Show.show(_.map {_.getOrElse("x")}.mkString(" "))
+
+  implicit val noteListShow: Show[NoteList] = Show.show(_.map {_.getOrElse("x")}.mkString(" "))
 
   implicit class StringToFretList(val str: String) extends AnyVal {
 
