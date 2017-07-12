@@ -172,7 +172,7 @@ object Operations {
     * @param tuning
     * @return (degrees, name, notes)
     */
-  def chords(chord: String)(implicit tuning: Tuning): (List[String], String, List[Option[String]]) = {
+  def chords(chord: String)(implicit tuning: Tuning): (List[String], String, List[Option[Note]]) = {
     def getRoot(fl: FretList, tuning: List[Int]): Int = {
       if (fl.head.isDefined) {
         norm(fl.head.get + tuning.head)
@@ -249,14 +249,19 @@ object Operations {
     helper(input, Nil, length)
   }
 
-  def notes(chord: Chord)(frets: FretList): List[Option[String]] = {
-    val scale = CircleOfFifths.majorScale(Note(chord.root))
+  def notes(chord: Chord)(frets: FretList): List[Option[Note]] = {
 
-    def applyAccidental(n: String, d: String): String = {
-      val note = Note(n)
-      val degree = Degree(d)
+    val scale = if (chord.isMinor) {
+      CircleOfFifths.minorScale(Note(chord.root)).zip(CircleOfFifths.minScaleDegrees)
+    } else {
+      CircleOfFifths.majorScale(Note(chord.root)).zip(CircleOfFifths.majScaleDegrees)
+    }
+
+    def applyAccidental(n: Note, d: Degree, sd: Degree): Note = {
+//      val note = Note(n)
+     // val degree = Degree(d)
       println(s"$n, $d")
-      degree.adjust(note).toString
+      sd.adjust(d).adjust(n)
 
 //      if (hasAccidental(d)) {
 //        if (n.length == 1) n + d.head else {
@@ -266,13 +271,13 @@ object Operations {
 //      } else n
     }
 
-    listOptFunc.map(chord.asDegrees(frets)){d => scale( d match {
-      case "R" => 0
-      case n:String =>
-        def f(n: Int) = if (n < 8) n - 1 else n % 8
-        if (hasAccidental(n)) f(n.tail.toInt) else f(n.toInt)
+    listOptFunc.map(chord.asDegrees(frets)){d: Degree => scale( d match {
+      //case Degree("R", None) => 0
+      case Degree(n, _) => if (n < 8 && n > 0) n - 1 else n % 8
+//        def f(n: Int) = if (n < 8) n - 1 else n % 8
+//        if (n.accidental.isDefined) f(n.tail.toInt) else f(n.toInt)
     })}.zip(chord.asDegrees(frets)).map{p =>
-    if (p._1.isDefined) Some(applyAccidental(p._1.get, p._2.get)) else p._1
+    if (p._1.isDefined) Some(applyAccidental(p._1.get._1, p._2.get, p._1.get._2)) else None
     }}
 
 }

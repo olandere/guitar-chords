@@ -9,14 +9,16 @@ object CircleOfFifths {
   private val sharps = (fifths ++ fifths.map(_ + "#") ++ fifths.map(_ + DOUBLE_SHARP)).tail
   private val flats = "C,F".split(",") ++ fifths.reverse.map(_ + "b") ++ fifths.reverse.map(_ + DOUBLE_FLAT)
  // private val flats = "C,F,Bb,Eb,Ab,Db,Gb,Cb,Fb".split(",")
-  private val allNotes = (CircleOfFifths.flats.reverse ++ CircleOfFifths.sharps).distinct
+  private val allNotes = (CircleOfFifths.flats.reverse ++ CircleOfFifths.sharps).distinct.map(Note.apply)
    val mapping = {
     val m = allNotes.toList.drop(12).zip(allNotes.toList)
      m.toMap.orElse(m.map(_.swap).toMap)
   }
 
   private val majScale = List(0, 2, 4, -1, 1, 3, 5)
-  private val minScale = List(0, 2, -3, -1, 1, -4, -2)
+   val majScaleDegrees = List("R", "2", "3", "4", "5", "6", "7").map(Degree.apply)
+  private val minScale = List(0, 2, -3, -1, 1, -4, -2) // R 2 b3 4 5 b6 b7
+   val minScaleDegrees = List("R", "2", "b3", "4", "5", "b6", "b7").map(Degree.apply)
 
   private def normalize(key: String) = key.replace("♯", "#").replace("♭", "b")
 
@@ -37,20 +39,20 @@ object CircleOfFifths {
 
   //def norm(i: Int) = if (i >= allNotes.length) i % 12 else i
 
-  private def useEnharmonic(key: Note, center: String = "C"): Boolean = {
-    math.abs(allNotes.indexOf(center) - allNotes.indexOf(normalize(key.toString))) > 7
+  private def useEnharmonic(key: Note, center: Note = Note("C")): Boolean = {
+    math.abs(allNotes.indexOf(center) - allNotes.indexOf(key)) > 7
   }
 
-  def majorScale(key: Note): List[String] = {
+  def majorScale(key: Note): List[Note] = {
     val root = if (useEnharmonic(key)) enharmonic(key) else key
     println(s"key: $key, root: $root")
-    majScale.map(i => allNotes(allNotes.indexOf(normalize(root.toString)) + i))
+    majScale.map(i => allNotes(allNotes.indexOf(root) + i))
   }
 
-  def minorScale(key: Note): List[String] = {
-    val root = if (useEnharmonic(key, "A")) key.enharmonic else key
+  def minorScale(key: Note): List[Note] = {
+    val root = if (useEnharmonic(key, Note("A"))) key.enharmonic else key
     println(s"key: $key, root: $root")
-    minScale.map(i => allNotes(allNotes.indexOf(normalize(root.toString)) + i))
+    minScale.map(i => allNotes(allNotes.indexOf(root) + i))
   }
 
   trait KeySignature {}

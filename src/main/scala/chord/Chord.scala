@@ -10,20 +10,30 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
     this(c.root, c.triad, c.quality, c.extension, c.alteration, c.added, c.suspension, c.altRoot)
   }
 
+  override def equals(obj: scala.Any): Boolean =
+    obj match {
+      case that: Chord => root == that.root && triad == that.triad && quality == that.quality &&
+        extension == that.extension && alteration == that.alteration && added == that.added &&
+        suspension == that.suspension && altRoot == that.altRoot
+      case _ => false
+    }
+
   def isValid: Boolean = true
+
+  def isMinor: Boolean = triad == "min" || triad == "dim"
 
   val INT_MAP = Map("1" -> 0, "3" -> 4, "5" -> 7, "6" -> 9, "7" -> 11, "9" -> 2, "11" -> 5, "13" -> 9, "R" -> 0)
 
   def altRootInterval: Option[Int] =
     if (altRoot.isDefined) {
       Some(norm(NOTE_MAP(altRoot.get) - NOTE_MAP(root)))
-    } else {None}
+    } else None
 
   /**
     * In case the chord has more tones than the instrument has strings, we need to split the semitones into
     * essential and non-essential intervals
     */
-  def splitIntervals(strings: Int) = {
+  def splitIntervals(strings: Int): (List[Int], List[Int]) = {
     if (strings > semitones.length) (semitones, Nil) else {
       (asShell.semitones, semitones.filterNot(i => asShell.semitones.contains(i)))
     }
@@ -157,7 +167,7 @@ class Chord(val root: String, val triad: String, val quality: String, val extens
   def asDegrees(a: FretList)(implicit tuning: Tuning): DegreeList = {
     println(s"asDegrees($a) tuning: $tuning")
     val mapping = SEMI_TO_INT ++ semitones.zip(intervals()).toMap ++ (if (suspension.isDefined) Map(2 -> "2", 5 -> "4") else Map.empty)
-    a.zip(tuning.semitones).map { case (f, s) => f.map { n => mapping(norm(n + s - retune(tuning)(root)))}
+    a.zip(tuning.semitones).map { case (f, s) => f.map { n => Degree(mapping(norm(n + s - retune(tuning)(root))))}
                       }
   }
 
@@ -206,13 +216,15 @@ class PowerChord(val r: String) extends Chord(r, "", "", 0, "", Nil, None, None)
   override lazy val semitones: List[Int] = List(0, 7, 0)
 
   override def intervals(extensions: => List[String] = Nil): List[String] = List("R", "5", "R")
+
+  override def toString: String = r+"5"
 }
 
 trait RootPosition {
   this: Chord =>
   override def filterFingerings(fingerings: List[FretList]): List[FretList] = {
     def isInRootPos(f: FretList) = {
-      asDegrees(f).dropWhile(_.isEmpty).head.get == "R"
+      asDegrees(f).dropWhile(_.isEmpty).head.get.value == 0
     }
     fingerings filter isInRootPos
   }
@@ -271,10 +283,10 @@ trait Drop2and4 {
 
 object Chord {
 
-  val chordMatch = """([ABCDEFG][♯#b♭]?)(m|-|\+|aug|dim|°)?(M|maj)?(6|7|9|11|13)?(([♯#b♭](5|9|11))*)(add(9|11|13))?(sus(2|4))?(/([ABCDEFG][♯#b♭]?))?"""
+  private val chordMatch = """([ABCDEFG][♯#b♭]?)(m|-|\+|aug|dim|°)?(M|maj)?(6|7|9|11|13)?(([♯#b♭](5|9|11))*)(add(9|11|13))?(sus(2|4))?(/([ABCDEFG][♯#b♭]?))?"""
                    .r
 
-  val powerChordMatch = """([ABCDEFG][♯#b♭]?)5""".r
+  private val powerChordMatch = """([ABCDEFG][♯#b♭]?)5""".r
 
   def triad(s: String): String = {
     s match {
@@ -338,7 +350,7 @@ object Chord {
   def unapply(s: String)(implicit tuning: Tuning): FretList = {
     (if (s.trim.length == tuning.numStrings) {
       s.trim.toList.map{_.toString}
-    } else delimitedToList(s))
+    } else {delimitedToList(s)})
     .map{case "x" | "X" => None; case c => Some(c.toInt)}
   }
 }

@@ -48,7 +48,7 @@ class OperationsSpec extends FlatSpec with Matchers {
     val c = Chord("C13")
     fingerings(c, 4).map{_.show} should contain("3 3 5 3 5 5")
 
-    assert(fingerings(c, 4).map{f : FretList => c.asDegrees(f)}.forall(_.contains(Some("13"))))
+    assert(fingerings(c, 4).map{f : FretList => c.asDegrees(f)}.forall(_.contains(Some(Degree("13")))))
   }
 
   it should "unfortunately, handle power chords" in {
@@ -180,7 +180,7 @@ class OperationsSpec extends FlatSpec with Matchers {
   it should "handle chords with more tones than strings" in {
     implicit val tuning = Tuning("G D A E")
     val c = Chord("C13")
-    assert(fingerings(c, 4).map{f : FretList => c.asDegrees(f)}.forall(_.contains(Some("13"))))
+    assert(fingerings(c, 4).map{f : FretList => c.asDegrees(f)}.forall(_.contains(Some(Degree("13")))))
   }
 
   it should "handle power chords in altered tunings" in {
@@ -200,6 +200,9 @@ class OperationsSpec extends FlatSpec with Matchers {
     //chords("6x776x") should matchPattern { case (_, "B♭M7", _) => }
     chords("097000") should matchPattern { case (_, "Emadd9add11", _) => }
     chords("x01x12") should matchPattern { case (List("x", "R", "♭5", "x", "♭3", "°7"), "Adim7", _) => }
+    chords("xx1212") should matchPattern { case (_, "D♯dim7", List(None, None, Some(Note('D', Sharp())),
+    Some(Note('A', Natural())),
+    Some(Note('C', Natural())), Some(Note('F', Sharp())))) => }
   }
 
 }
