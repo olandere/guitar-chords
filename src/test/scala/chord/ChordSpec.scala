@@ -6,27 +6,27 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalacheck.Gen
 
 /**
- * Created by eolander on 1/4/15.
- */
+  * Created by eolander on 1/4/15.
+  */
 class ChordSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks {
 
   "A chord" should "have correct semitones" in {
-    Chord("Gdim7").semitones shouldBe List(0,3,6,9)
-    Chord("Cdim").semitones shouldBe List(0,3,6)
-    Chord("Eb").semitones shouldBe List(0,4,7)
-    Chord("Bb-7").semitones shouldBe List(0,3,7,10)
-    Chord("F#-7b5").semitones shouldBe List(0,3,6,10)
-    Chord("F9").semitones shouldBe List(0,4,7,10,2)
-    Chord("AM13").semitones shouldBe List(0,4,7,11,2,5,9)
-    Chord("C6").semitones shouldBe List(0,4,7,9)
-    Chord("Db+").semitones shouldBe List(0,4,8)
-    Chord("B+11").semitones shouldBe List(0,4,8,10,2,5)
-    Chord("E7b9").semitones shouldBe List(0,4,7,10,1)
+    Chord("Gdim7").semitones shouldBe List(0, 3, 6, 9)
+    Chord("Cdim").semitones shouldBe List(0, 3, 6)
+    Chord("Eb").semitones shouldBe List(0, 4, 7)
+    Chord("Bb-7").semitones shouldBe List(0, 3, 7, 10)
+    Chord("F#-7b5").semitones shouldBe List(0, 3, 6, 10)
+    Chord("F9").semitones shouldBe List(0, 4, 7, 10, 2)
+    Chord("AM13").semitones shouldBe List(0, 4, 7, 11, 2, 5, 9)
+    Chord("C6").semitones shouldBe List(0, 4, 7, 9)
+    Chord("Db+").semitones shouldBe List(0, 4, 8)
+    Chord("B+11").semitones shouldBe List(0, 4, 8, 10, 2, 5)
+    Chord("E7b9").semitones shouldBe List(0, 4, 7, 10, 1)
   }
 
   it should "be a correct shell chord" in {
-    Chord("Bb-7").asShell.semitones shouldBe List(0,3,10)
-    Chord("AM13").asShell.semitones shouldBe List(0,4,11,9)
+    Chord("Bb-7").asShell.semitones shouldBe List(0, 3, 10)
+    Chord("AM13").asShell.semitones shouldBe List(0, 4, 11, 9)
   }
 
   it should "have the correct degrees" in {
@@ -55,7 +55,7 @@ class ChordSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyCheck
     implicit val tuning = Tuning.StandardTuning
     val G5 = Chord("G5")
     G5.toString shouldBe "G5"
-    G5.semitones shouldBe List(0,7,0)
+    G5.semitones shouldBe List(0, 7)
     val fingering = Chord.unapply("3 5 5 x x x")
     G5.asDegrees(fingering).show shouldBe "R 5 R x x x"
   }
@@ -81,7 +81,7 @@ class ChordSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyCheck
   it should "handle banjo chords" in {
     implicit val tuning = Tuning("D G B D")
     val c = Chord("C")
-    c.semitones shouldBe List(0,4,7)
+    c.semitones shouldBe List(0, 4, 7)
     val fingering = Chord.unapply("2 0 1 x")
     c.asDegrees(fingering).show shouldBe "3 5 R x"
   }
@@ -118,7 +118,7 @@ class ChordSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyCheck
   }
 
   it should "handle random chords" in {
-    forAll(ChordGenerator.chordGen) {(c) =>
+    forAll(ChordGenerator.chordGen) { (c) =>
       println(s"c: $c")
       Chord(c).semitones shouldBe List(0, 4, 7)
     }
