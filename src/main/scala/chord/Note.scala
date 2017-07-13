@@ -5,8 +5,6 @@ package chord
   */
 case class Note(name: Char, accidental: Accidental) {
 
-  //"ABCDEFG".zip("2122122")
-
   private val notes = "ABCDEFG".toCharArray
 
   def next(arr: Array[Char])(ch: Char): Char = arr((arr.indexOf(ch) + 1) % arr.length)
@@ -15,7 +13,6 @@ case class Note(name: Char, accidental: Accidental) {
 
   override def toString: String = s"$name$accidental"
 
-  //def enharmonic: Note = Note(CircleOfFifths.enharmonic(this.toString))
   def enharmonic: Note = {
     def determineAccidental(note: Char, acc1: Accidental, acc2: Accidental): Accidental = {
       if (note == 'E' || note == 'B') acc1 else acc2
@@ -47,22 +44,19 @@ case class Degree(value: Int, accidental: Option[Accidental]) {
 sealed trait Accidental {
   def adjust(note: Note): Note
 
-  def invert: Accidental = this
-
   def adjust(a: Option[Accidental]): Option[Accidental] = a
 }
 
 case class Natural() extends Accidental {
-  override def toString = ""
+  override def toString: String = ""
 
   override def adjust(note: Note): Note = {
     note
   }
-
 }
 
 case class Sharp() extends Accidental {
-  override def toString = "♯"
+  override def toString: String = "♯"
 
   override def adjust(note: Note): Note = {
     note.accidental match {
@@ -73,16 +67,15 @@ case class Sharp() extends Accidental {
     }
   }
 
-  override def invert = Flat()
-
   override def adjust(a: Option[Accidental]): Option[Accidental] =
-    a.map { case DoubleSharp() => Sharp()
-            case Sharp() => Natural()
+    a.map {
+      case DoubleSharp() => Sharp()
+      case Sharp() => Natural()
     }
 }
 
 case class Flat() extends Accidental {
-  override def toString = "♭"
+  override def toString: String = "♭"
 
   override def adjust(note: Note): Note = {
     note.accidental match {
@@ -93,16 +86,15 @@ case class Flat() extends Accidental {
     }
   }
 
-  override def invert = Sharp()
-
   override def adjust(a: Option[Accidental]): Option[Accidental] =
-    a.map { case DoubleFlat() => Flat()
-            case Flat() => Natural()
+    a.map {
+      case DoubleFlat() => Flat()
+      case Flat() => Natural()
     }
 }
 
 case class DoubleSharp() extends Accidental {
-  override def toString = DOUBLE_SHARP
+  override def toString: String = DOUBLE_SHARP
 
   override def adjust(note: Note): Note = {
     note.accidental match {
@@ -114,7 +106,7 @@ case class DoubleSharp() extends Accidental {
 }
 
 case class DoubleFlat() extends Accidental {
-  override def toString = DOUBLE_FLAT
+  override def toString: String = DOUBLE_FLAT
 
   override def adjust(note: Note): Note = {
     note.accidental match {
@@ -124,7 +116,6 @@ case class DoubleFlat() extends Accidental {
     }
   }
 }
-
 
 object Note {
   def apply(n: String): Note = {
@@ -146,16 +137,6 @@ object Accidental {
       }
     }
   }
-
-//  def apply(s: String): Option[Accidental] = {
-//    Option(s match {
-//      case "♭" | "b" => Flat()
-//      case "♯" | "#" => Sharp()
-//      case "°" | DOUBLE_FLAT => DoubleFlat()
-//      case DOUBLE_SHARP => DoubleSharp()
-//      case _ => null
-//    })
-//  }
 }
 
 object Degree {

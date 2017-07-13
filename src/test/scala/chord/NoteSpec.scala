@@ -34,11 +34,17 @@ class NoteSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks
   it should "handle double sharps" in {
     Note("A" + DOUBLE_SHARP).enharmonic shouldBe Note("B")
     Note("B" + DOUBLE_SHARP).enharmonic shouldBe Note("C#")
+    DoubleSharp().adjust(Note("C")) shouldBe Note("C" + DOUBLE_SHARP)
+    DoubleSharp().adjust(Note("Ab")) shouldBe Note("A#")
+    DoubleSharp().adjust(Note("D" + DOUBLE_FLAT)) shouldBe Note("D")
   }
 
   it should "handle double flats" in {
     Note("A" + DOUBLE_FLAT).enharmonic shouldBe Note("G")
     Note("C" + DOUBLE_FLAT).enharmonic shouldBe Note("Bb")
+    DoubleFlat().adjust(Note("D")) shouldBe Note("D" + DOUBLE_FLAT)
+    DoubleFlat().adjust(Note("G#")) shouldBe Note("Gb")
+    DoubleFlat().adjust(Note("A" + DOUBLE_SHARP)) shouldBe Note("A")
   }
 
   it should "handle degrees" in {
