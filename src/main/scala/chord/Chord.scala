@@ -213,9 +213,9 @@ object InvalidChord extends Chord("", "", "", 0, "", Nil, None, None) {
 
 class PowerChord(val r: String) extends Chord(r, "", "", 0, "", Nil, None, None) {
 
-  override lazy val semitones: List[Int] = List(0, 7, 0)
+  override lazy val semitones: List[Int] = List(0, 7)
 
-  override def intervals(extensions: => List[String] = Nil): List[String] = List("R", "5", "R")
+  override def intervals(extensions: => List[String] = Nil): List[String] = List("R", "5")
 
   override def toString: String = r+"5"
 }
