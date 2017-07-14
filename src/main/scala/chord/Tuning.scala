@@ -1,27 +1,37 @@
 package chord
 
-class Tuning(val semitones: List[Int], val root: String) {
+class Tuning(val semitones: List[Int], val root: Note) {
 
   override def toString: String = {
     val revmap = retune(this).map(e => (e._2, e._1))
-    val nmap = revmap.withDefault { n => revmap(norm(n - 1)) + "#"}
-    semitones.map {nmap}.mkString(" ")
+    val nmap = revmap.withDefault { n => revmap(norm(n - 1)) + "#" }
+    semitones.map {
+      nmap
+    }.mkString(" ")
   }
 
   def numStrings: Int = semitones.length
 
-  override def equals(obj: Any) = obj match {
+  override def equals(obj: Any): Boolean = obj match {
     case that: Tuning => semitones == that.semitones && root == that.root
     case _ => false
+  }
+
+  def notes: List[Note] = {
+    val revmap = retune(this).map(e => (e._2, e._1))
+    val nmap = revmap.withDefault { n => Note(revmap(norm(n - 1)).name, Sharp()) }
+    semitones.map {
+      nmap
+    }
   }
 }
 
 object Tuning {
 
-  val StandardTuning = Tuning(List(0, 5, 10, 3, 7, 0), "E")
+  val StandardTuning = Tuning(List(0, 5, 10, 3, 7, 0), Note("E"))
   val DADGAD = Tuning("D A D G A D")
 
-  def apply(semitones: List[Int], root: String): Tuning = {
+  def apply(semitones: List[Int], root: Note): Tuning = {
     new Tuning(semitones, root)
   }
 
@@ -31,8 +41,8 @@ object Tuning {
   }
 
   def apply(notes: List[String]): Tuning = {
-    val root = notes.head
-    val semitones = notes.map { n => norm(NOTE_MAP(n) - NOTE_MAP(root))}
+    val root = Note(notes.head)
+    val semitones = notes.map { n => norm(NOTE_MAP(Note(n)) - NOTE_MAP(root)) }
     new Tuning(semitones, root)
   }
 }

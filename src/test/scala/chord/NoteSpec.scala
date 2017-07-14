@@ -31,12 +31,33 @@ class NoteSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks
     Note("C#").enharmonic shouldBe Note("Db")
   }
 
+  it should "handle sharps" in {
+    Sharp().adjust(Note("C")) shouldBe Note("C#")
+    Sharp().adjust(Note("C#")) shouldBe Note("C" + DOUBLE_SHARP)
+    Sharp().adjust(Note("Db")) shouldBe Note("D")
+    Sharp().adjust(Note("D" + DOUBLE_FLAT)) shouldBe Note("Db")
+  }
+
+  it should "adjust accidentals for sharps" in {
+    Sharp().adjust(None) shouldBe None
+    Sharp().adjust(Some(DoubleSharp())) shouldBe Some(Sharp())
+    Sharp().adjust(Some(Sharp())) shouldBe Some(Natural())
+  }
+
+  it should "handle flats" in {
+    Flat().adjust(Note("D")) shouldBe Note("Db")
+    Flat().adjust(Note("D#")) shouldBe Note("D")
+    Flat().adjust(Note("D" + DOUBLE_SHARP)) shouldBe Note("D#")
+    Flat().adjust(Note("Db")) shouldBe Note("D" + DOUBLE_FLAT)
+  }
+
   it should "handle double sharps" in {
     Note("A" + DOUBLE_SHARP).enharmonic shouldBe Note("B")
     Note("B" + DOUBLE_SHARP).enharmonic shouldBe Note("C#")
     DoubleSharp().adjust(Note("C")) shouldBe Note("C" + DOUBLE_SHARP)
     DoubleSharp().adjust(Note("Ab")) shouldBe Note("A#")
     DoubleSharp().adjust(Note("D" + DOUBLE_FLAT)) shouldBe Note("D")
+    Note("A" + DOUBLE_SHARP).toString shouldBe "A" + DOUBLE_SHARP
   }
 
   it should "handle double flats" in {

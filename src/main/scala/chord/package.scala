@@ -45,41 +45,46 @@ package object chord {
     def fl: FretList = str.split(" ").map { case "x" => None; case n: String => Option(n.toInt) }.toList
   }
 
-  private def mapAccidentals(note: String, map: Map[String, Int]) = {
-    if (note.endsWith("b") || note.endsWith("♭")) {
-      -1 + map(note.head.toString)
+  private def mapAccidentals(note: Note, map: Map[Note, Int]): Int = {
+    val noteVal = map(Note(note.name, Natural()))
+    if (note.accidental == Flat()) {
+      -1 + noteVal
     } else {
-      1 + map(note.head.toString)
+      1 + noteVal
     }
   }
 
-  private def revMapAccidentals(note: Int, map: Map[Int, String], preferSharps: Boolean = true): String = {
+  private def revMapAccidentals(note: Int, map: Map[Int, Note], preferSharps: Boolean = true): Note = {
     if (preferSharps) {
-      map(norm(note - 1)) + "♯"
-    } else {map(norm(note + 1)) + "♭"}
+      Note(map(norm(note - 1)).name, Sharp())
+    } else {
+      Note(map(norm(note + 1)).name, Flat())}
   }
 
-  val NOTE_MAP: Map[String, Int] =
-    Map("E" -> 0, "F" -> 1, "G" -> 3, "A" -> 5, "B" -> 7, "C" -> 8, "D" -> 10).withDefault { r =>
-      mapAccidentals(r, NOTE_MAP)
+  val NOTE_MAP: Map[Note, Int] = {
+    val m = Map(Note("E") -> 0, Note("F") -> 1, Note("G") -> 3, Note("A") -> 5, Note("B") -> 7,
+      Note("C") -> 8, Note("D") -> 10)
+
+      m.withDefault { r => mapAccidentals(r, m)
     }
+  }
 
   val SEMI_TO_INT = Map(0 -> "R", 1 -> "♭9", 2 -> "9", 3 -> "♭3", 4 -> "3", 5 -> "11", 6 -> "♭5", 7 -> "5", 8 -> "♯5",
                         9 -> "13", 10 -> "♭7", 11 -> "7")
 
   implicit val tuning = Tuning.StandardTuning
 
-  def retune(tuning: Tuning): Map[String, Int] = {
+  def retune(tuning: Tuning): Map[Note, Int] = {
     val newmap = NOTE_MAP.map { e => (e._1, norm(e._2 - NOTE_MAP(tuning.root))) }
     newmap.withDefault { r => mapAccidentals(r, newmap)}
   }
 
-  def retune(root: String): Map[String, Int] = {
+  def retune(root: Note): Map[Note, Int] = {
     val newmap = NOTE_MAP.map { e => (e._1, norm(e._2 - NOTE_MAP(root))) }
     newmap.withDefault { r => mapAccidentals(r, newmap)}
   }
 
-  def reverseNoteMap(root: String, preferSharps: Boolean = true): Map[Int, String] = {
+  def reverseNoteMap(root: Note, preferSharps: Boolean = true): Map[Int, Note] = {
     val map = retune(root).map{case(k, v) => v -> k }
     map.withDefault(n=>revMapAccidentals(n, map, preferSharps))
   }

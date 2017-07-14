@@ -123,6 +123,8 @@ object Note {
   }
 }
 
+object InvalidNote extends Note(' ', Natural())
+
 object Accidental {
   def apply(s: String): Accidental = {
     if (s.length == 0) {
