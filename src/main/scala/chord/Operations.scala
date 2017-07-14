@@ -224,9 +224,9 @@ object Operations {
 //    } yield (f1, f2)
   }
 
-  def fingering(scale: Scale)(implicit tuning: Tuning): Array[List[Int]] = {
+  def fingering(scale: Scale)(implicit tuning: Tuning): List[List[Int]] = {
     for {
-     root <- tuning.toString.split(" ")
+     root <- tuning.notes
      frets = (scale.intervals ++ scale.intervals.map(_ + 12)).map {_ + retune(root)(scale.root)}
     }
     yield (frets ++ frets.map(_ % 12)).sorted.distinct.filter(_ < 16)
@@ -252,9 +252,9 @@ object Operations {
   def notes(chord: Chord)(frets: FretList): List[Option[Note]] = {
 
     val scale = if (chord.isMinor) {
-      CircleOfFifths.minorScale(Note(chord.root)).zip(CircleOfFifths.minScaleDegrees)
+      CircleOfFifths.minorScale(chord.root).zip(CircleOfFifths.minScaleDegrees)
     } else {
-      CircleOfFifths.majorScale(Note(chord.root)).zip(CircleOfFifths.majScaleDegrees)
+      CircleOfFifths.majorScale(chord.root).zip(CircleOfFifths.majScaleDegrees)
     }
 
     def applyAccidental(n: Note, d: Degree, sd: Degree): Note = {

@@ -30,7 +30,7 @@ trait ChordParser extends RegexParsers {
   }
 
   val powerChord: Parser[Chord] = root <~ "5" ^^ {
-    case r => new PowerChord(r)
+    case r => new PowerChord(Note(r))
   }
 
   val chordList: Parser[List[Chord]] = repsep(powerChord | chord, sep)

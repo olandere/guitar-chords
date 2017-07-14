@@ -6,14 +6,15 @@ import org.scalatest._
   * Created by eolander on 4/23/16.
   */
 class ChordParserSpec extends FlatSpec with Matchers {
+  import chord._
 
   "ChordParser" should "recognize power chords" in {
-    ChordParser("A5") shouldBe List(new PowerChord("A"))
+    ChordParser("A5") shouldBe List(PowerChord("A"))
   }
 
   it should "recognize lists of chords" in {
-    ChordParser("E A B5 Dm7") shouldBe List(Chord("E"), Chord("A"), new PowerChord("B"), Chord("Dm7"))
-    ChordParser("C/G,G,D/A,A5") shouldBe List(Chord("C/G"), Chord("G"), Chord("D/A"), new PowerChord("A"))
+    ChordParser("E A B5 Dm7") shouldBe List(Chord("E"), Chord("A"), PowerChord("B"), Chord("Dm7"))
+    ChordParser("C/G,G,D/A,A5") shouldBe List(Chord("C/G"), Chord("G"), Chord("D/A"), PowerChord("A"))
   }
 
   it should "handle slash chords" in {

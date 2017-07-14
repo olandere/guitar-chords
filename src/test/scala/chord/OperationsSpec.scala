@@ -113,14 +113,15 @@ class OperationsSpec extends FlatSpec with Matchers {
   }
 
   it should "handle modes" in {
-    val EmajScale = MajorScale("E")
-    val AmajScale = MajorScale("A")
-    val FsDorian = Dorian("F#")
-    val GsPhrygian = Phrygian("G#")
-    val ALydian = Lydian("A")
-    val BMixolydian = Mixolydian("B")
-    val CsAeolian = Aeolian("C#")
-    val DsLocrian = Locrian("D#")
+
+    val EmajScale = MajorScale(Note("E"))
+    val AmajScale = MajorScale(Note("A"))
+    val FsDorian = Dorian(Note("F#"))
+    val GsPhrygian = Phrygian(Note("G#"))
+    val ALydian = Lydian(Note("A"))
+    val BMixolydian = Mixolydian(Note("B"))
+    val CsAeolian = Aeolian(Note("C#"))
+    val DsLocrian = Locrian(Note("D#"))
     fingering(EmajScale) should be(
       Array(List(0, 2, 4, 5, 7, 9, 11, 12, 14), List(0, 2, 4, 6, 7, 9, 11, 12, 14),
             List(1, 2, 4, 6, 7, 9, 11, 13, 14), List(1, 2, 4, 6, 8, 9, 11, 13, 14),
