@@ -41,4 +41,15 @@ class ScaleSpec extends FlatSpec with Matchers {
 
   }
 
+  it should "handle modes" in {
+    val cMaj = MajorScale(Note("C"))
+    Dorian(Note("D")).relatedScale shouldBe cMaj
+    Phrygian(Note("E")).relatedScale shouldBe cMaj
+    Lydian(Note("F")).relatedScale shouldBe cMaj
+    Mixolydian(Note("G")).relatedScale shouldBe cMaj
+    Aeolian(Note("A")).relatedScale shouldBe cMaj
+    Locrian(Note("B")).relatedScale shouldBe cMaj
+    SuperLocrian(Note("B")).relatedScale shouldBe cMaj
+  }
+
 }
