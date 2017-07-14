@@ -121,6 +121,8 @@ object Note {
   def apply(n: String): Note = {
     new Note(n.head, Accidental(n.tail))
   }
+
+  def notes(str: String): Seq[Note] = str.split(",").map{ n => apply(n.trim)}.toSeq
 }
 
 object InvalidNote extends Note(' ', Natural())
