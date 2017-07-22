@@ -206,7 +206,7 @@ object Operations {
     * @param tuning
     * @return (degrees, name, notes)
     */
-  def chords(chord: String)(implicit tuning: Tuning): (List[String], String, List[Option[Note]]) = {
+  def chords(chord: String)(implicit tuning: Tuning): (List[String], String, NoteList) = {
     def getRoot(fl: FretList, tuning: List[Int]): Int = {
       if (fl.head.isDefined) {
         norm(fl.head.get + tuning.head)
@@ -293,7 +293,7 @@ object Operations {
     helper(input, Nil, length)
   }
 
-  def notes(chord: Chord)(frets: FretList): List[Option[Note]] = {
+  def notes(chord: Chord)(frets: FretList): NoteList = {
 
     val scale = if (chord.isMinor) {
       CircleOfFifths.minorScale(chord.root).zip(CircleOfFifths.minScaleDegrees)
