@@ -18,15 +18,13 @@ trait TuningParser extends RegexParsers {
       _.toInt
     }
 
-  val noteTuning: Parser[Tuning] = note.+ ^^ {
-    case ns => Tuning(ns)
-  }
+  val noteTuning: Parser[Tuning] = note.+ ^^ (ns => Tuning(ns))
 
   val jmTuning: Parser[Tuning] = note ~ fret.* ^^ {
     case rt ~ fs => Tuning(fs.scanLeft(0) { (i, j) => (i + j) % 12 }, Note(rt))
   }
 
-  val tuning = noteTuning ||| jmTuning
+  val tuning: Parser[Tuning] = noteTuning ||| jmTuning
 }
 
 object TuningParser extends TuningParser {
