@@ -1,6 +1,6 @@
 package chord
 
-class Tuning(val semitones: List[Int], val root: Note) {
+case class Tuning(semitones: List[Int], root: Note) {
 
   override def toString: String = {
     val revmap = retune(this).map(e => (e._2, e._1))
@@ -11,11 +11,6 @@ class Tuning(val semitones: List[Int], val root: Note) {
   }
 
   def numStrings: Int = semitones.length
-
-  override def equals(obj: Any): Boolean = obj match {
-    case that: Tuning => semitones == that.semitones && root == that.root
-    case _ => false
-  }
 
   def notes: List[Note] = {
     val revmap = retune(this).map(e => (e._2, e._1))
