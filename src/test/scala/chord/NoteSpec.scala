@@ -19,7 +19,7 @@ class NoteSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks
 
   it should "correctly handle enharmonic names" in {
     forAll(NoteGenerator.noteGen.filter(n => !Set("C♭", "B♯", "F♭", "E♯").contains(n.toString))) { (n) =>
-      println(s"note: $n")
+     // println(s"note: $n")
       n.enharmonic.enharmonic shouldBe n
     }
   }
