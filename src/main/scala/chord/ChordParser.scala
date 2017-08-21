@@ -4,6 +4,8 @@ package chord
  * Created by eolander on 6/1/15.
  */
 
+import grizzled.slf4j.Logging
+
 import scala.language.postfixOps
 import scala.util.parsing.combinator._
 
@@ -29,20 +31,19 @@ trait ChordParser extends RegexParsers {
     case r~t~q~e~ad~al~sus~ar => Chord(r, t, e, q, al, ad, sus, ar)
   }
 
-  val powerChord: Parser[Chord] = root <~ "5" ^^ {
-    case r => new PowerChord(Note(r))
-  }
+  val powerChord: Parser[Chord] = root <~ "5" ^^ (r => new PowerChord(Note(r)))
 
   val chordList: Parser[List[Chord]] = repsep(powerChord | chord, sep)
-
 }
 
-object ChordParser extends ChordParser {
+object ChordParser extends ChordParser with Logging {
 
   def apply(input: String): List[Chord] = {
     parseAll(chordList, input) match {
       case Success(result, _) => result
-      case failure : NoSuccess => scala.sys.error(failure.msg)
+      case failure: NoSuccess =>
+        error(s"$input: ${failure.msg}")
+        List(InvalidChord)
     }
   }
 }
