@@ -9,6 +9,9 @@ sealed trait Scale {
 
   def intervals: List[Int]
 
+  def semitones: List[Int] = intervals.zip(intervals.tail :+ intervals.head)
+    .map { case (a, b) => ((b - a) + 12) % 12 }
+
   def containsChord(chord: Chord): Boolean = {
     val semitones = chord.semitones.map { s => norm(s + retune(root)(chord.root)) }
     semitones.intersect(intervals) == semitones
