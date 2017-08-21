@@ -8,52 +8,52 @@ import grizzled.slf4j.Logging
 class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning) extends Logging {
   import ChordNamer._
 
-  println(s"fl: $fl, root: $root")
+ // println(s"fl: $fl, root: $root")
 
   def SEMI_TO_DEGREE = Map(0 -> 0, 1 -> 2, 2 -> 2, 3 -> 3, 4 -> 3, 5 -> 4,
                            6 -> 5, 7 -> 5, 8 -> 6, 9 -> 6, 10 -> 7, 11 -> 7)
 
-  lazy val intervals = {
+  lazy val intervals: FretList = {
     fl.zip(tuning.semitones).map{case (Some(n), t) => Some(norm(n+t-root)); case (None, _) => None}//.filterNot(_ == None).map(_.get)//.sorted
   }
 
-  def hasMinorThird = intervals.contains(Some(3))
+  private def hasMinorThird = intervals.contains(Some(3))
 
-  def hasMajorThird = intervals.contains(Some(4))
+  private def hasMajorThird = intervals.contains(Some(4))
 
-  def hasSharpNine = hasMinorThird && hasMajorThird
+  private def hasSharpNine = hasMinorThird && hasMajorThird
 
-  def no3rd = !(hasMinorThird || hasMajorThird)
+  private def no3rd = !(hasMinorThird || hasMajorThird)
 
-  def hasDomSeven = intervals.contains(Some(10))
+  private def hasDomSeven = intervals.contains(Some(10))
 
-  def hasMajSeven = intervals.contains(Some(11))
+  private def hasMajSeven = intervals.contains(Some(11))
 
-  def has7 = hasDomSeven || hasMajSeven
+  private def has7 = hasDomSeven || hasMajSeven
 
-  def hasDimSeventh = intervals.contains(Some(9))
+  private def hasDimSeventh = intervals.contains(Some(9))
 
-  def hasFlatFifth = intervals.contains(Some(6))
+  private def hasFlatFifth = intervals.contains(Some(6))
 
-  def hasFifth = intervals.contains(Some(7))
+  private def hasFifth = intervals.contains(Some(7))
 
-  def hasAugFifth = intervals.contains(Some(8))
+  private def hasAugFifth = intervals.contains(Some(8))
 
-  def isDim = hasMinorThird && hasFlatFifth
+  private def isDim = hasMinorThird && hasFlatFifth
 
-  def isDiminishedSeventh = isDim && hasDimSeventh
+  def isDiminishedSeventh: Boolean = isDim && hasDimSeventh
 
-  def hasFlat9 = intervals.contains(Some(1))
+  private def hasFlat9 = intervals.contains(Some(1))
 
-  def has9 = intervals.contains(Some(2))
+  private def has9 = intervals.contains(Some(2))
 
-  def has11 = intervals.contains(Some(5))
+  private def has11 = intervals.contains(Some(5))
 
-  def has13 = intervals.contains(Some(9))
+  private def has13 = intervals.contains(Some(9))
 
-  def hasExtensions = has9 || has11 || has13
+  private def hasExtensions = has9 || has11 || has13
 
-  def isAugmented = hasMajorThird && hasAugFifth
+  private def isAugmented = hasMajorThird && hasAugFifth
 
   def apply(): String = {
     if (isDiminishedSeventh) "dim7"
@@ -109,11 +109,11 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning) exten
 
   def determineInversion: String = {
     if (isDiminishedSeventh || isAugmented) {
-      println("Is dim7")
+    //  println("Is dim7")
       "root" //otherwise a diminished looks like 1st inversion
      } else {
-      info(intervals.distinct)
-      info(fretListToIntList(intervals.distinct).sorted map SEMI_TO_DEGREE)
+    //  info(intervals.distinct)
+    //  info(fretListToIntList(intervals.distinct).sorted map SEMI_TO_DEGREE)
     fretListToIntList(intervals.distinct).sorted map SEMI_TO_DEGREE match {
       case List(0, 3, 5) | List(0, 3, 5, 7) => "root" // case classes???
       case List(0, 3, 6) | List(0, 3, 5, 6) => "1st"
@@ -145,7 +145,7 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning) exten
     }
     val root = getRoot(fl.zip(tuning.semitones), intervals, newRoot)
    // val ints = intervals(fl, root)
-    println(this)
+   // println(this)
     new ChordNamer(fl, root)
   }
 
@@ -190,8 +190,8 @@ object ChordNamer {
   //def apply(chord: List[Int]) = new ChordNamer(chord.sorted)()
 
   //accepts fingering
-  def apply(chord: String)(implicit tuning: Tuning): ChordNamer = {
-    ChordNamer(Chord.unapply(chord)).respell
+  def apply(fingering: String)(implicit tuning: Tuning): ChordNamer = {
+    ChordNamer(Chord.unapply(fingering)).respell
   }
 
   def apply(fl: FretList)(implicit tuning: Tuning): ChordNamer = {
