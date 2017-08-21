@@ -206,4 +206,10 @@ class OperationsSpec extends FlatSpec with Matchers {
     Some(Note('C', Natural())), Some(Note('F', Sharp())))) => }
   }
 
+  it should "correctly handle InvalidChord" in {
+    fingerings(InvalidChord, 4) shouldBe Nil
+    arpeggio(InvalidChord) shouldBe Nil
+    roots(InvalidChord.root) shouldBe Nil
+  }
+
 }
