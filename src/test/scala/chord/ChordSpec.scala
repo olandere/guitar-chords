@@ -47,8 +47,17 @@ class ChordSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyCheck
   it should "handle slash chords" in {
     implicit val tuning = Tuning.StandardTuning
     val chord = Chord("A/F")
+    chord.altRoot shouldBe Some(Note("F"))
+    chord.altRootInterval shouldBe Some(8)
+    chord.semitones shouldBe List(0, 4, 7)
+
     val fingering = Chord.unapply("1 x 2 0 1 x")
     chord.asDegrees(fingering).show
+
+    val amb = Chord("Am/B")
+    amb.altRoot shouldBe Some(Note("B"))
+    amb.altRootInterval shouldBe Some(2)
+    amb.semitones shouldBe List(0, 3, 7)
   }
 
   it should "handle power chords" in {
@@ -122,5 +131,10 @@ class ChordSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyCheck
       println(s"c: $c")
       Chord(c).semitones shouldBe List(0, 4, 7)
     }
+  }
+
+  it should "handle invalid chords" in {
+    Chord("D77") shouldBe InvalidChord
+    Chord("D77").isValid shouldBe false
   }
 }
