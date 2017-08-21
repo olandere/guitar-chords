@@ -3,21 +3,21 @@
 //todo - allow notes to be dropped - e.g. no 5
 package chord
 
-class Chord(val root: Note, val triad: String, val quality: String, val extension: Int,
-            val alteration: String, val added: List[String], val suspension: Option[String], val altRoot: Option[Note]) {
+case class Chord(root: Note, triad: String, quality: String, extension: Int,
+            alteration: String, added: List[String], suspension: Option[String], altRoot: Option[Note]) {
 
   def this(c: Chord) = {
     this(c.root, c.triad, c.quality, c.extension, c.alteration, c.added, c.suspension, c.altRoot)
   }
 
-  override def equals(obj: scala.Any): Boolean =
-    obj match {
-      case that: Chord => root == that.root && triad == that.triad && quality == that.quality &&
-        extension == that.extension && alteration == that.alteration && added == that.added &&
-        suspension == that.suspension && altRoot == that.altRoot
-      case _ => false
-    }
-
+//  override def equals(obj: scala.Any): Boolean =
+//    obj match {
+//      case that: Chord => root == that.root && triad == that.triad && quality == that.quality &&
+//        extension == that.extension && alteration == that.alteration && added == that.added &&
+//        suspension == that.suspension && altRoot == that.altRoot
+//      case _ => false
+//    }
+//
   def isValid: Boolean = true
 
   def isMinor: Boolean = triad == "min" || triad == "dim"
@@ -25,9 +25,7 @@ class Chord(val root: Note, val triad: String, val quality: String, val extensio
   val INT_MAP = Map("1" -> 0, "3" -> 4, "5" -> 7, "6" -> 9, "7" -> 11, "9" -> 2, "11" -> 5, "13" -> 9, "R" -> 0)
 
   def altRootInterval: Option[Int] =
-    if (altRoot.isDefined) {
-      Some(norm(NOTE_MAP(altRoot.get) - NOTE_MAP(root)))
-    } else None
+    altRoot.map(ar => norm(NOTE_MAP(ar) - NOTE_MAP(root)))
 
   /**
     * In case the chord has more tones than the instrument has strings, we need to split the semitones into
@@ -43,7 +41,7 @@ class Chord(val root: Note, val triad: String, val quality: String, val extensio
 
     def performAlterations(ints: List[String]) = {
       def substitute(ints: List[String], alts: List[String]): List[String] = {
-        println(s"ints: $ints, alts: $alts")
+//        println(s"ints: $ints, alts: $alts")
         if (alts.isEmpty) {ints} else if (ints.isEmpty) {alts} else {
           if (alts.head.tail == ints.head) {
             alts.head :: substitute(ints.tail, alts.tail)
@@ -165,7 +163,7 @@ class Chord(val root: Note, val triad: String, val quality: String, val extensio
   }
 
   def asDegrees(a: FretList)(implicit tuning: Tuning): DegreeList = {
-    println(s"asDegrees($a) tuning: $tuning")
+//    println(s"asDegrees($a) tuning: $tuning")
     val mapping = SEMI_TO_INT ++ semitones.zip(intervals()).toMap ++ (if (suspension.isDefined) Map(2 -> "2", 5 -> "4") else Map.empty)
     a.zip(tuning.semitones).map { case (f, s) => f.map { n => Degree(mapping(norm(n + s - retune(tuning)(root))))}
                       }
@@ -217,11 +215,11 @@ class PowerChord(val r: Note) extends Chord(r, "", "", 0, "", Nil, None, None) {
 
   override def intervals(extensions: => List[String] = Nil): List[String] = List("R", "5")
 
-  override def toString: String = r+"5"
+  override def toString: String = r + "5"
 }
 
 object PowerChord {
-  def apply(r: String) = new PowerChord(Note(r))
+  def apply(r: String): Chord = new PowerChord(Note(r))
 }
 
 trait RootPosition {
@@ -287,11 +285,6 @@ trait Drop2and4 {
 
 object Chord {
 
-  private val chordMatch = """([ABCDEFG][♯#b♭]?)(m|-|\+|aug|dim|°)?(M|maj)?(6|7|9|11|13)?(([♯#b♭](5|9|11))*)(add(9|11|13))?(sus(2|4))?(/([ABCDEFG][♯#b♭]?))?"""
-                   .r
-
-  private val powerChordMatch = """([ABCDEFG][♯#b♭]?)5""".r
-
   def triad(s: String): String = {
     s match {
       case "m" | "-" => "min"
@@ -336,14 +329,6 @@ object Chord {
 
   def apply(s: String): Chord = {
     ChordParser(s).head
-//    Try {
-//          val chordMatch(root, t, qual, ext, alt, _, _, _, added, _, suspension, _, altRoot) = s
-//          new Chord(s, root, triad(t), seventh(t, qual), Option(ext).getOrElse("0").toInt, Option(alt).getOrElse(""),
-//                    Option(added), Option(suspension), Option(altRoot))
-//        }.getOrElse(Try {
-//          val powerChordMatch(root) = s
-//          new PowerChord(s, root)
-//        }.getOrElse(InvalidChord))
   }
 
   def apply(r: String, t: Option[String], e:Option[String],q:Option[String],al:List[String],ad:List[String],sus:Option[String],ar:Option[String]): Chord ={
