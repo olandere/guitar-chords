@@ -13,6 +13,8 @@ case class Note(name: Char, accidental: Accidental) {
 
   override def toString: String = s"$name$accidental"
 
+  val isValid = true
+
   def enharmonic: Note = {
     def determineAccidental(note: Char, acc1: Accidental, acc2: Accidental): Accidental = {
       if (note == 'E' || note == 'B') acc1 else acc2
@@ -125,7 +127,9 @@ object Note {
   def notes(str: String): Seq[Note] = str.split(",").map{ n => apply(n.trim)}.toSeq
 }
 
-object InvalidNote extends Note(' ', Natural())
+object InvalidNote extends Note(' ', Natural()) {
+  override val isValid = false
+}
 
 object Accidental {
   def apply(s: String): Accidental = {
