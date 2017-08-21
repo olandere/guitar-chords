@@ -32,13 +32,13 @@ object CircleOfFifths {
 
   def majorScale(key: Note): List[Note] = {
     val root = if (useEnharmonic(key)) key.enharmonic else key
-    println(s"key: $key, root: $root")
+    //println(s"key: $key, root: $root")
     majScale.map(i => allNotes(allNotes.indexOf(root) + i))
   }
 
   def minorScale(key: Note): List[Note] = {
     val root = if (useEnharmonic(key, Note("A"))) key.enharmonic else key
-    println(s"key: $key, root: $root")
+    //println(s"key: $key, root: $root")
     minScale.map(i => allNotes(allNotes.indexOf(root) + i))
   }
 
