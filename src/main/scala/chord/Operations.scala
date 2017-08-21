@@ -10,8 +10,8 @@ import scala.annotation.tailrec
  */
 object Operations {
 
-  val fretListFold = Foldable[List].compose[Option]
-  val listOptFunc = Functor[List].compose[Option]
+  private val fretListFold = Foldable[List].compose[Option]
+  private val listOptFunc = Functor[List].compose[Option]
 
   def generatePermutations(chord: Chord, withRepetition: Boolean = true)(implicit tuning: Tuning): Iterator[FretList] = {
     val semitones = (if (chord.altRoot.isDefined && !chord.semitones.contains(chord.altRootInterval.get)) {
@@ -25,7 +25,7 @@ object Operations {
       val (essential, optional) = chord.splitIntervals(tuning.numStrings)
       //    println(s"$semitones, $essential, $optional")
       //    println(semitones.filterNot(n => optional.contains(n.get)))
-      combWithRepeat((if (optional.isEmpty) essential else optional).map {
+      combWithRepeat((if (optional.isEmpty) {essential} else optional).map {
         Some(_)
       } ++ List(None),
         tuning.numStrings - essential.length).map { l => l ++ semitones.filterNot(n => optional.contains(n.get)) }
@@ -35,9 +35,7 @@ object Operations {
   }
 
   private def withinSpan(fretSpan: Int)(c: FretList): Boolean = {
-    val m = fretListFold.filter_(c) {
-      _ > 0
-    }
+    val m = fretListFold.filter_(c)(_ > 0)
     if (m.isEmpty) {
       false
     } else {
@@ -46,9 +44,9 @@ object Operations {
   }
 
   def adjustOctave2(c: FretList): FretList = {
-    def fretspan(f: FretList) = {
+    def fretspan(f: FretList): Int = {
       val m = fretListFold.filter_(f) { _ => true }
-      m.max - m.min
+      if (m.isEmpty) 0 else m.max - m.min
     }
 
     def hasOpenStrings(c: FretList): Boolean = {
@@ -56,11 +54,12 @@ object Operations {
     }
 
     def raiseStrings(c: FretList): FretList = {
-      val max = c.max.get
-      listOptFunc.map(c) { n => if (n != max && math.abs(max - n) > math.abs(max - (n + 12))) n + 12 else n }
-      //      c.map { case Some(0) => Some(12)
-      //      case x => x
-      //            }
+      c.max.map { max =>
+        listOptFunc.map(c) { n => if (n != max && math.abs(max - n) > math.abs(max - (n + 12))) n + 12 else n }
+        //      c.map { case Some(0) => Some(12)
+        //      case x => x
+        //            }
+      }.getOrElse(c)
     }
 
     val result = c.map {
@@ -210,8 +209,7 @@ object Operations {
     def getRoot(fl: FretList, tuning: List[Int]): Int = {
       if (fl.head.isDefined) {
         norm(fl.head.get + tuning.head)
-      }
-      else {
+      } else {
         getRoot(fl.tail, tuning.tail)
       }
     }
@@ -275,15 +273,16 @@ object Operations {
       yield (frets ++ frets.map(_ % 12)).sorted.distinct.filter(_ < 16)
   }
 
-  def possibleScales(chord: Chord)(implicit tuning: Tuning) = {
+  def possibleScales(chord: Chord)(implicit tuning: Tuning): List[Scale] = {
     Scale.allScales(chord.root).filter(_.containsChord(chord))
   }
 
-  def combWithRepeat[T](input: List[T], length: Int) = {
+  def combWithRepeat[T](input: List[T], length: Int): List[List[T]] = {
 
     def helper(inSet: List[T], result: List[T], len: Int): List[List[T]] = {
-      if (len == 0) List(result)
-      else {
+      if (len == 0) {
+        List(result)
+      } else {
         helper(inSet, result :+ inSet.head, len - 1) ++
           (if (inSet.length > 1) helper(inSet.tail, result, len) else Nil)
       }
@@ -304,7 +303,7 @@ object Operations {
     def applyAccidental(n: Note, d: Degree, sd: Degree): Note = {
       //      val note = Note(n)
       // val degree = Degree(d)
-      println(s"$n, $d")
+ //     println(s"$n, $d")
       sd.adjust(d).adjust(n)
 
       //      if (hasAccidental(d)) {
@@ -328,18 +327,22 @@ object Operations {
   }
 
   def roots(root: Note)(implicit tuning: Tuning): List[Int] = {
-    for {
-      note <- tuning.notes
-    } yield (retune(note)(root) + 12) % 12
+    if (root.isValid) {
+      for {
+        note <- tuning.notes
+      } yield (retune(note)(root) + 12) % 12
+    } else Nil
   }
 
   def arpeggio(chord: Chord)(implicit tuning: Tuning): List[List[Int]] = {
-    for {
-      root <- tuning.notes
-      frets = (chord.semitones ++ chord.semitones.map(_ + 12)).map {
-        _ + retune(root)(chord.root)
-      }
-    } yield (frets ++ frets.map(_ % 12)).sorted.distinct.filter(_ < 13)
+    if (chord.isValid) {
+      for {
+        root <- tuning.notes
+        frets = (chord.semitones ++ chord.semitones.map(_ + 12)).map {
+          _ + retune(root)(chord.root)
+        }
+      } yield (frets ++ frets.map(_ % 12)).sorted.distinct.filter(_ < 13)
+    } else Nil
   }
 
   def scaleFingering(scaleRoot: Note, semitones: List[Int])(implicit tuning: Tuning): List[List[Int]] = {
