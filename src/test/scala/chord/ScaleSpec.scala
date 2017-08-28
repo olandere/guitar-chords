@@ -52,4 +52,12 @@ class ScaleSpec extends FlatSpec with Matchers {
     SuperLocrian(Note("B")).relatedScale shouldBe cMaj
   }
 
+  it should "create scales from names" in {
+    Scale(Note("C"), "Dorian") shouldBe Dorian(Note("C"))
+  }
+
+  it should "create a scale from degrees" in {
+    Scale(Note("C"), "2 3 5 6").semitones shouldBe MajorPent(Note("C")).semitones
+  }
+
 }
