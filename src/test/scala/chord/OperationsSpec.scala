@@ -7,7 +7,7 @@ import org.scalatest._
 /**
  * Created by eolander on 12/28/14.
  */
-class OperationsSpec extends FlatSpec with Matchers {
+class OperationsSpec extends FlatSpec with Matchers with Inspectors {
 
   "Fingerings" should "generate known fingerings" in {
 
@@ -212,4 +212,13 @@ class OperationsSpec extends FlatSpec with Matchers {
     roots(InvalidChord.root) shouldBe Nil
   }
 
+  it should "generate valid fret positions for arpeggios" in {
+    forAll (arpeggio(Chord("Ab"))) { fl =>
+      forAll (fl) { f => f should be >= 0 }
+    }
+  }
+
+  it should "generate valid arpeggios" in {
+    arpeggio(Chord("E")).apply(0) shouldBe List(0, 4, 7, 12)
+  }
 }
