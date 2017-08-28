@@ -340,8 +340,9 @@ object Operations {
         root <- tuning.notes
         frets = (chord.semitones ++ chord.semitones.map(_ + 12)).map {
           _ + retune(root)(chord.root)
-        }
-      } yield (frets ++ frets.map(_ % 12)).sorted.distinct.filter(_ < 13)
+        }.map{n => (n + 12) % 12}
+      } yield //(frets ++ frets.map{n => (n + 12) % 12}).sorted.distinct.filter(_ < 13)
+        (frets ++ (if (frets.contains(0)) List(12) else Nil)).sorted.distinct.filter(_ < 13)
     } else Nil
   }
 
@@ -351,8 +352,8 @@ object Operations {
       root <- tuning.notes
       frets = (scale ++ scale.map(_ + 12)).map {
         _ + retune(root)(scaleRoot)
-      }
-    } yield (frets ++ frets.map(_ % 12)).sorted.distinct.filter(_ < 13).toList
+      }.map{n => (n + 12) % 12}
+    } yield (frets ++ (if (frets.contains(0)) List(12) else Nil)).sorted.distinct.filter(_ < 13).toList
   }
 }
 
