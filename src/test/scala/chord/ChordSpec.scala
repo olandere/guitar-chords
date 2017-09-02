@@ -137,4 +137,10 @@ class ChordSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyCheck
     Chord("D77") shouldBe InvalidChord
     Chord("D77").isValid shouldBe false
   }
+
+  it should "handle invalid input" in {
+    Chord.unapply("9p9") shouldBe Nil
+    Chord.unapply("9 p 9") shouldBe Nil
+    Chord.unapply("9 p 9 1 1 1") shouldBe Nil
+  }
 }
