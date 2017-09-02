@@ -1,5 +1,7 @@
 package chord
 
+import grizzled.slf4j.Logging
+
 import scala.language.postfixOps
 import scala.util.parsing.combinator._
 
@@ -27,7 +29,7 @@ trait TuningParser extends RegexParsers {
   val tuning: Parser[Tuning] = noteTuning ||| jmTuning
 }
 
-object TuningParser extends TuningParser {
+object TuningParser extends TuningParser with Logging {
 
   import scala.collection.immutable.StringOps
 
@@ -36,7 +38,9 @@ object TuningParser extends TuningParser {
   def apply(input: String): Tuning = {
     parseAll(tuning, capitalize(input)) match {
       case Success(result, _) => result
-      case failure: NoSuccess => scala.sys.error(failure.msg)
+      case failure: NoSuccess =>
+        error(s"$input: ${failure.msg}")
+        Tuning.StandardTuning
     }
   }
 }

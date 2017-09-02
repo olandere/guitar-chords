@@ -77,4 +77,8 @@ class NoteSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks
     val flat3 = Degree("b3")
     flat3.adjust(e) shouldBe Note("Eb")
   }
+
+  it should "not care about case differences" in {
+    Note("c") shouldBe Note("C")
+  }
 }

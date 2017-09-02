@@ -130,7 +130,7 @@ case class DoubleFlat() extends Accidental {
 
 object Note {
   def apply(n: String): Note = {
-    new Note(n.head, Accidental(n.tail))
+    new Note(n.head.toTitleCase, Accidental(n.tail))
   }
 
   def notes(str: String): Seq[Note] = str.split(",").map{ n => apply(n.trim)}.toSeq

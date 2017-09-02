@@ -3,6 +3,8 @@
 //todo - allow notes to be dropped - e.g. no 5
 package chord
 
+import scala.util.Try
+
 case class Chord(root: Note, triad: String, quality: String, extension: Int,
             alteration: String, added: List[String], suspension: Option[String], altRoot: Option[Note]) {
 
@@ -337,9 +339,14 @@ object Chord {
   }
 
   def unapply(s: String)(implicit tuning: Tuning): FretList = {
+    if (s.trim.length < tuning.numStrings) Nil
+    else Try(
     (if (s.trim.length == tuning.numStrings) {
       s.trim.toList.map{_.toString}
     } else {delimitedToList(s)})
-    .map{case "x" | "X" => None; case c => Some(c.toInt)}
+    .map {
+      case "x" | "X" => None
+      case c => Some(c.toInt)
+    }).getOrElse(Nil)
   }
 }

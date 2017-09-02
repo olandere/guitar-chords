@@ -19,4 +19,8 @@ class TuningParserSpec extends FlatSpec with Matchers {
   it should "understand Joni Mitchell notation" in {
     TuningParser("E55545") shouldBe Tuning.StandardTuning
   }
+
+  it should "handle invalid input" in {
+    TuningParser("asfd") shouldBe Tuning.StandardTuning
+  }
 }
