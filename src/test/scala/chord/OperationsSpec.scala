@@ -114,8 +114,8 @@ class OperationsSpec extends FlatSpec with Matchers with Inspectors {
 
   it should "handle modes" in {
 
-    val EmajScale = MajorScale(Note("E"))
-    val AmajScale = MajorScale(Note("A"))
+    val EmajScale = Major(Note("E"))
+    val AmajScale = Major(Note("A"))
     val FsDorian = Dorian(Note("F#"))
     val GsPhrygian = Phrygian(Note("G#"))
     val ALydian = Lydian(Note("A"))
