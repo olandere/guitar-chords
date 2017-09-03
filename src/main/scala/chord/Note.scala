@@ -43,7 +43,7 @@ case class Degree(value: Int, accidental: Option[Accidental]) {
     accidental.map { a => Degree(degree.value, a.adjust(degree.accidental)) }.getOrElse(degree)
 
   def semitone: Int = {
-    val s = MajorScale(Note("C")).intervals(if (value > 0) value - 1 else value)
+    val s = Major(Note("C")).intervals(if (value > 0) value - 1 else value)
     accidental.map {
       case Sharp() => s + 1
       case Flat() => s - 1

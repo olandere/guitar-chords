@@ -5,6 +5,10 @@ package chord
  */
 sealed trait Scale {
 
+  import Scale._
+
+  val name: String = getName(this.getClass.toString.drop(12))
+
   def root: Note
 
   def intervals: List[Int]
@@ -36,17 +40,17 @@ sealed trait Scale {
   def major = List(2,2,1,2,2,2,1)
   
   def genIntervals(n: Int): List[Int] = rotateLeft(major, n).scanLeft(0)(_+_).take(7)
+
+  override def toString: String = s"$root $name"
 }
 
-case class MajorScale(root: Note) extends Scale {
+case class Major(root: Note) extends Scale {
 
   def intervals: List[Int] = genIntervals(0)
 
   def relatedScale: Scale = this
 
   def relativeMinor: Scale = Aeolian(noteMap(9))
-
-  override def toString: String = s"$root Major"
 }
 
 case class HarmonicMinor(root: Note) extends Scale {
@@ -54,8 +58,6 @@ case class HarmonicMinor(root: Note) extends Scale {
   def intervals: List[Int] = List(0, 2, 3, 5, 7, 8, 11)
 
   def relatedScale: Scale = this
-
-  override def toString: String = s"$root Harmonic Minor"
 }
 
 case class MelodicMinor(root: Note) extends Scale {
@@ -63,26 +65,20 @@ case class MelodicMinor(root: Note) extends Scale {
   def intervals: List[Int] = List(0, 2, 3, 5, 7, 9, 11)
 
   def relatedScale: Scale = this
-
-  override def toString: String = s"$root Melodic Minor"
 }
 
 case class Dorian(root: Note) extends Scale {
 
   def intervals: List[Int] = genIntervals(1)//List(2,1,2,2,2,1,2)
 
-  def relatedScale: Scale = MajorScale(noteMap(10))
-
-  override def toString: String = s"$root Dorian"
+  def relatedScale: Scale = Major(noteMap(10))
 }
 
 case class Phrygian(root: Note) extends Scale {
 
   def intervals: List[Int] = genIntervals(2)
 
-  def relatedScale: Scale = MajorScale(noteMap(8))
-
-  override def toString: String = s"$root Phrygian"
+  def relatedScale: Scale = Major(noteMap(8))
 }
 
 case class PhrygianDominant(root: Note) extends Scale {
@@ -90,8 +86,6 @@ case class PhrygianDominant(root: Note) extends Scale {
   def intervals: List[Int] = List(0, 1, 4, 5, 7, 8, 10)
 
   def relatedScale: Scale = HarmonicMinor(noteMap(5))
-
-  override def toString: String = s"$root Phrygian Dominant"
 }
 
 case class DoubleHarmonic(root: Note) extends Scale {
@@ -99,80 +93,62 @@ case class DoubleHarmonic(root: Note) extends Scale {
   def intervals: List[Int] = List(0, 1, 4, 5, 7, 8, 11)
 
   def relatedScale: Scale = this
-
-  override def toString: String = s"$root Double Harmonic"
 }
 
 case class Lydian(root: Note) extends Scale {
 
   def intervals: List[Int] = genIntervals(3)
 
-  def relatedScale: Scale = MajorScale(noteMap(7))
-
-  override def toString: String = s"$root Lydian"
+  def relatedScale: Scale = Major(noteMap(7))
 }
 
 case class LydianDominant(root: Note) extends Scale {
 
   def intervals: List[Int] = List(0, 2, 4, 6, 7, 9, 10)
 
-  def relatedScale: Scale = MajorScale(noteMap(7))
-
-  override def toString: String = s"$root Lydian Dominant"
+  def relatedScale: Scale = Major(noteMap(7))
 }
 
 case class Mixolydian(root: Note) extends Scale {
 
   def intervals: List[Int] = genIntervals(4)
 
-  def relatedScale: Scale = MajorScale(noteMap(5))
-
-  override def toString: String = s"$root Mixolydian"
+  def relatedScale: Scale = Major(noteMap(5))
 }
 
 case class Aeolian(root: Note) extends Scale {
 
   def intervals: List[Int] = genIntervals(5)
 
-  def relatedScale: Scale = MajorScale(noteMap(3))
-
-  override def toString: String = s"$root Aeolian"
+  def relatedScale: Scale = Major(noteMap(3))
 }
 
 case class Locrian(root: Note) extends Scale {
 
   def intervals: List[Int] = genIntervals(6)
 
-  def relatedScale: Scale = MajorScale(noteMap(1))
-
-  override def toString: String = s"$root Locrian"
+  def relatedScale: Scale = Major(noteMap(1))
 }
 
 case class SuperLocrian(root: Note) extends Scale {
 
   def intervals: List[Int] = List(0, 1, 3, 4, 6, 8, 10)
 
-  def relatedScale: Scale = MajorScale(noteMap(1))
-
-  override def toString: String = s"$root Super Locrian"
+  def relatedScale: Scale = Major(noteMap(1))
 }
 
-case class MinorPent(root: Note) extends Scale {
+case class MinorPentatonic(root: Note) extends Scale {
 
   def intervals: List[Int] = List(0, 3, 5, 7, 10)
 
-  def relatedScale: Scale = MajorScale(noteMap(3))
-
-  override def toString: String = s"$root Minor Pentatonic"
+  def relatedScale: Scale = Major(noteMap(3))
 }
 
-case class MajorPent(root: Note) extends Scale {
+case class MajorPentatonic(root: Note) extends Scale {
 
   def intervals: List[Int] = List(0, 2, 4, 7, 9)
 
-  def relatedScale: Scale = MajorScale(noteMap(0))
-
-  override def toString: String = s"$root Major Pentatonic"
+  def relatedScale: Scale = Major(noteMap(0))
 }
 
 case class ScaleByDegrees(root: Note, degrees: List[Degree]) extends Scale {
@@ -185,14 +161,29 @@ case class ScaleByDegrees(root: Note, degrees: List[Degree]) extends Scale {
 
 object Scale {
 
+  private val nameSplitter = """(?<=.)(?=(\p{Upper}))""".r
+
+  def getName(n: String): String = nameSplitter.split(n).mkString(" ")
+
+  def supportedScales: List[String] = {
+    import scala.reflect.runtime.{universe => ru}
+
+    val tpe = ru.typeOf[Scale]
+    val clazz = tpe.typeSymbol.asClass
+    clazz.knownDirectSubclasses
+      .filterNot(_.fullName.contains("ScaleByDegrees"))
+      .map(c => getName(c.fullName.split("\\.").tail.head)).toList
+  }
+
   def allScales(root: Note): List[Scale] = {
-    List(MajorScale(root), Dorian(root), Phrygian(root), PhrygianDominant(root), Lydian(root), LydianDominant(root),
-         Mixolydian(root), Aeolian(root), Locrian(root), SuperLocrian(root), MinorPent(root), MajorPent(root))
+    List(Major(root), Dorian(root), Phrygian(root), PhrygianDominant(root), Lydian(root),
+      LydianDominant(root), Mixolydian(root), Aeolian(root), Locrian(root), SuperLocrian(root),
+      MinorPentatonic(root), MajorPentatonic(root))
   }
 
   def apply(root: Note, scaleName: String): Scale = {
     scaleName match {
-      case "Major" => MajorScale(root)
+      case "Major" => Major(root)
       case "Harmonic Minor" => HarmonicMinor(root)
       case "Melodic Minor" => MelodicMinor(root)
       case "Dorian" => Dorian(root)
@@ -205,14 +196,13 @@ object Scale {
       case "Double Harmonic" => DoubleHarmonic(root)
       case "Lydian Dominant" => LydianDominant(root)
       case "Super Locrian" => SuperLocrian(root)
-      case "Minor Pentatonic" => MinorPent(root)
-      case "Major Pentatonic" => MajorPent(root)
-      case _ => {
+      case "Minor Pentatonic" => MinorPentatonic(root)
+      case "Major Pentatonic" => MajorPentatonic(root)
+      case _ =>
         val degrees = DegreeParser(scaleName)
         if (degrees.nonEmpty)
           ScaleByDegrees(root, degrees)
-        else MajorScale(root)
-      }
+        else Major(root)
     }
   }
 }

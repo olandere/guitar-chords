@@ -13,7 +13,7 @@ class ScaleSpec extends FlatSpec with Matchers {
   }
 
   it should "handle major scales" in {
-    val cMaj = MajorScale(Note("C"))
+    val cMaj = Major(Note("C"))
     cMaj.relativeMinor shouldBe Aeolian(Note("A"))
     cMaj.root shouldBe Note("C")
     cMaj.relativeMinor.root shouldBe Note("A")
@@ -22,13 +22,13 @@ class ScaleSpec extends FlatSpec with Matchers {
   }
 
   it should "handle sharp keys" in {
-    val dMaj = MajorScale(Note("D"))
+    val dMaj = Major(Note("D"))
     dMaj.relativeMinor shouldBe Aeolian(Note("B"))
     dMaj.notes shouldBe notes("D,E,F#,G,A,B,C#")
   }
 
   it should "handle flat keys" in {
-    val fMaj = MajorScale(Note("F"))
+    val fMaj = Major(Note("F"))
     fMaj.relativeMinor shouldBe Aeolian(Note("D"))
     fMaj.notes shouldBe notes("F,G,A,Bb,C,D,E")
   }
@@ -42,7 +42,7 @@ class ScaleSpec extends FlatSpec with Matchers {
   }
 
   it should "handle modes" in {
-    val cMaj = MajorScale(Note("C"))
+    val cMaj = Major(Note("C"))
     Dorian(Note("D")).relatedScale shouldBe cMaj
     Phrygian(Note("E")).relatedScale shouldBe cMaj
     Lydian(Note("F")).relatedScale shouldBe cMaj
@@ -57,7 +57,17 @@ class ScaleSpec extends FlatSpec with Matchers {
   }
 
   it should "create a scale from degrees" in {
-    Scale(Note("C"), "2 3 5 6").semitones shouldBe MajorPent(Note("C")).semitones
+    Scale(Note("C"), "2 3 5 6").semitones shouldBe MajorPentatonic(Note("C")).semitones
+  }
+
+  it should "compute the name of a scale" in {
+    MelodicMinor(Note("A")).toString shouldBe "A Melodic Minor"
+  }
+
+  it should "get names of all supported scales" in {
+    Scale.supportedScales should contain("Major")
+    Scale.supportedScales should contain("Super Locrian")
+    Scale.supportedScales shouldNot contain("Scale By Degrees")
   }
 
 }
