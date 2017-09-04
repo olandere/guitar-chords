@@ -70,4 +70,8 @@ class ScaleSpec extends FlatSpec with Matchers {
     Scale.supportedScales shouldNot contain("Scale By Degrees")
   }
 
+  it should "get all scales for a note" in {
+    Scale.allScales(Note("C")) should contain(Locrian(Note("C")))
+  }
+
 }

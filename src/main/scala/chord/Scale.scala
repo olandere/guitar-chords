@@ -165,20 +165,31 @@ object Scale {
 
   def getName(n: String): String = nameSplitter.split(n).mkString(" ")
 
-  def supportedScales: List[String] = {
+  private val allScaleClasses = {
     import scala.reflect.runtime.{universe => ru}
 
     val tpe = ru.typeOf[Scale]
     val clazz = tpe.typeSymbol.asClass
     clazz.knownDirectSubclasses
+  }
+
+  val supportedScales: List[String] = {
+    allScaleClasses
       .filterNot(_.fullName.contains("ScaleByDegrees"))
       .map(c => getName(c.fullName.split("\\.").tail.head)).toList
   }
 
   def allScales(root: Note): List[Scale] = {
-    List(Major(root), Dorian(root), Phrygian(root), PhrygianDominant(root), Lydian(root),
-      LydianDominant(root), Mixolydian(root), Aeolian(root), Locrian(root), SuperLocrian(root),
-      MinorPentatonic(root), MajorPentatonic(root))
+    import scala.reflect.runtime.{universe => ru}
+
+    val m = ru.runtimeMirror(this.getClass.getClassLoader)
+
+    allScaleClasses.filterNot(_.fullName.contains("ScaleByDegrees")).map{c =>
+      val cm = m.reflectClass(c.asClass)
+      val ctor = c.asClass.primaryConstructor.asMethod
+      val ctorm = cm.reflectConstructor(ctor)
+      ctorm(root).asInstanceOf[Scale]
+    }.toList
   }
 
   def apply(root: Note, scaleName: String): Scale = {
