@@ -20,7 +20,7 @@ class CircleOfFifthsSpec extends FlatSpec with Matchers {
     majorScale(Note("G")).mkString shouldBe "GABCDEF♯"
     majorScale(Note("D")).mkString shouldBe "DEF♯GABC♯"
     majorScale(Note("C")).mkString shouldBe "CDEFGAB"
-    majorScale(Note("G#")).mkString shouldBe majorScale(Note("Ab")).mkString
+    majorScale(Note("G#")).mkString shouldBe s"G♯A♯B♯C♯D♯E♯F$DOUBLE_SHARP"
   }
 
   it should "generate minor scales" in {

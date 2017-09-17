@@ -30,10 +30,11 @@ object CircleOfFifths {
     math.abs(allNotes.indexOf(center) - allNotes.indexOf(key)) > 7
   }
 
-  def majorScale(key: Note): List[Note] = {
+  def majorScale(key: Note): Seq[Note] = {
     val root = if (useEnharmonic(key)) key.enharmonic else key
     //println(s"key: $key, root: $root")
-    majScale.map(i => allNotes(allNotes.indexOf(root) + i))
+    //majScale.map(i => allNotes(allNotes.indexOf(root) + i))
+    Major(key).notes
   }
 
   def minorScale(key: Note): List[Note] = {
