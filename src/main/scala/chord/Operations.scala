@@ -64,7 +64,7 @@ object Operations {
 
     val result = c.map {
       _.map {
-        norm
+        norm(_)
       }
     }
     //  if (hasOpenStrings(result)) {

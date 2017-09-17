@@ -14,7 +14,7 @@ case class Tuning(semitones: List[Int], root: Note) {
 
   def notes: List[Note] = {
     val revmap = retune(this).map(e => (e._2, e._1))
-    val nmap = revmap.withDefault { n => Note(revmap(norm(n - 1)).name, Sharp()) }
+    val nmap = revmap.withDefault { n => Note(revmap(norm(n - 1)).name, Sharp) }
     semitones.map {
       nmap
     }
