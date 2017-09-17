@@ -2,11 +2,15 @@ package chord
 
 import org.scalatest.{FlatSpec, Matchers}
 import Note._
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 /**
   * Created by ericolander on 7/13/17.
   */
-class ScaleSpec extends FlatSpec with Matchers {
+class ScaleSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks {
+
+  implicit override val generatorDrivenConfig =
+    PropertyCheckConfiguration(minSuccessful = 50)
 
   "Scale" should "" in {
 
@@ -34,11 +38,13 @@ class ScaleSpec extends FlatSpec with Matchers {
   }
 
   it should "handle F# and C# major" in {
-
+    Major(Note("C#")).notes shouldBe notes("C#,D#,E#,F#,G#,A#,B#")
+    Major(Note("F#")).notes shouldBe notes("F#,G#,A#,B,C#,D#,E#")
   }
 
   it should "handle Gb and Cb major" in {
-
+    Major(Note("Gb")).notes shouldBe notes("Gb,Ab,Bb,Cb,Db,Eb,F")
+    Major(Note("Cb")).notes shouldBe notes("Cb,Db,Eb,Fb,Gb,Ab,Bb")
   }
 
   it should "handle modes" in {
@@ -72,6 +78,16 @@ class ScaleSpec extends FlatSpec with Matchers {
 
   it should "get all scales for a note" in {
     Scale.allScales(Note("C")) should contain(Locrian(Note("C")))
+  }
+
+  it should "validate random scales have the correct number of notes" in {
+    forAll(ScaleGenerator.scaleGen) { (s) =>
+      val noteSet = s.notes.map(_.name).toSet
+      if (s.name.contains("Pentatonic"))
+        noteSet.size shouldBe 5
+      else
+        noteSet.size shouldBe 7
+    }
   }
 
 }
