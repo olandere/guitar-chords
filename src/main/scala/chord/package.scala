@@ -46,8 +46,8 @@ package object chord {
   }
 
   private def mapAccidentals(note: Note, map: Map[Note, Int]): Int = {
-    val noteVal = map(Note(note.name, Natural()))
-    if (note.accidental == Flat()) {
+    val noteVal = map(Note(note.name, Natural))
+    if (note.accidental == Flat) {
       -1 + noteVal
     } else {
       1 + noteVal
@@ -56,9 +56,9 @@ package object chord {
 
   private def revMapAccidentals(note: Int, map: Map[Int, Note], preferSharps: Boolean = true): Note = {
     if (preferSharps) {
-      Note(map(norm(note - 1)).name, Sharp())
+      Note(map(norm(note - 1)).name, Sharp)
     } else {
-      Note(map(norm(note + 1)).name, Flat())}
+      Note(map(norm(note + 1)).name, Flat)}
   }
 
   val NOTE_MAP: Map[Note, Int] = {
@@ -91,7 +91,7 @@ package object chord {
 
   def hasAccidental(n: String): Boolean = "♭b♯#°".toSet(n.head)
 
-  def norm(x: Int): Int = (x + 12) % 12
+  def norm(x: Int, b: Int = 12): Int = (x + b) % b
 
   //converts a space delimited string into a list, eliminating extraneous whitespace
   def delimitedToList(s: String): List[String] = s.trim.split(" ").toList.filter{!_.isEmpty}

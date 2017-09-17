@@ -65,7 +65,7 @@ class OperationsSpec extends FlatSpec with Matchers with Inspectors {
   it should "chart progressions" in {
     implicit val tuning = Tuning.StandardTuning
     val p = progression(List(Chord("Em7"), Chord("CM7")), 3)
-    println(p)
+  //  println(p)
   }
 
   it should "handle root position filter" in {
@@ -201,9 +201,20 @@ class OperationsSpec extends FlatSpec with Matchers with Inspectors {
     //chords("6x776x") should matchPattern { case (_, "B♭M7", _) => }
     chords("097000") should matchPattern { case (_, "Emadd9add11", _) => }
     chords("x01x12") should matchPattern { case (List("x", "R", "♭5", "x", "♭3", "°7"), "Adim7", _) => }
-    chords("xx1212") should matchPattern { case (_, "D♯dim7", List(None, None, Some(Note('D', Sharp())),
-    Some(Note('A', Natural())),
-    Some(Note('C', Natural())), Some(Note('F', Sharp())))) => }
+    chords("xx1212") should matchPattern { case (_, "D♯dim7", List(None, None, Some(Note('D', Sharp)),
+    Some(Note('A', Natural)),
+    Some(Note('C', Natural)), Some(Note('F', Sharp)))) => }
+   // val noteList = "E,A,C#,G,B,E".split(",").map(Note.apply).toList
+    chords("0 12 11 0 0 0") should matchPattern {
+      case (_, _, List(
+      Some(Note('E', Natural)),
+      Some(Note('A', Natural)),
+      Some(Note('C', Sharp)),
+      Some(Note('G', Natural)),
+      Some(Note('B', Natural)),
+      Some(Note('E', Natural)),
+      )) =>
+    }
   }
 
   it should "correctly handle InvalidChord" in {
@@ -220,5 +231,9 @@ class OperationsSpec extends FlatSpec with Matchers with Inspectors {
 
   it should "generate valid arpeggios" in {
     arpeggio(Chord("E")).apply(0) shouldBe List(0, 4, 7, 12)
+  }
+
+  it should "handle dim chord inversions" in {
+    chords("2 x 1 x 1 x")
   }
 }

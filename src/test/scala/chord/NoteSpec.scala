@@ -9,11 +9,11 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 class NoteSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks {
 
   implicit override val generatorDrivenConfig =
-    PropertyCheckConfiguration(minSuccessful = 50)
+    PropertyCheckConfiguration(minSuccessful = 1000)
 
   it should "create notes" in {
     forAll(NoteGenerator.noteGen) { (n) =>
-      println(s"note: $n")
+  //    println(s"note: $n")
     }
   }
 
@@ -32,40 +32,40 @@ class NoteSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks
   }
 
   it should "handle sharps" in {
-    Sharp().adjust(Note("C")) shouldBe Note("C#")
-    Sharp().adjust(Note("C#")) shouldBe Note("C" + DOUBLE_SHARP)
-    Sharp().adjust(Note("Db")) shouldBe Note("D")
-    Sharp().adjust(Note("D" + DOUBLE_FLAT)) shouldBe Note("Db")
+    Sharp.adjust(Note("C")) shouldBe Note("C#")
+    Sharp.adjust(Note("C#")) shouldBe Note("C" + DOUBLE_SHARP)
+    Sharp.adjust(Note("Db")) shouldBe Note("D")
+    Sharp.adjust(Note("D" + DOUBLE_FLAT)) shouldBe Note("Db")
   }
 
   it should "adjust accidentals for sharps" in {
-    Sharp().adjust(None) shouldBe None
-    Sharp().adjust(Some(DoubleSharp())) shouldBe Some(Sharp())
-    Sharp().adjust(Some(Sharp())) shouldBe Some(Natural())
+    Sharp.adjust(Natural) shouldBe Natural
+    Sharp.adjust(DoubleSharp) shouldBe Sharp
+    Sharp.adjust(Sharp) shouldBe Natural
   }
 
   it should "handle flats" in {
-    Flat().adjust(Note("D")) shouldBe Note("Db")
-    Flat().adjust(Note("D#")) shouldBe Note("D")
-    Flat().adjust(Note("D" + DOUBLE_SHARP)) shouldBe Note("D#")
-    Flat().adjust(Note("Db")) shouldBe Note("D" + DOUBLE_FLAT)
+    Flat.adjust(Note("D")) shouldBe Note("Db")
+    Flat.adjust(Note("D#")) shouldBe Note("D")
+    Flat.adjust(Note("D" + DOUBLE_SHARP)) shouldBe Note("D#")
+    Flat.adjust(Note("Db")) shouldBe Note("D" + DOUBLE_FLAT)
   }
 
   it should "handle double sharps" in {
     Note("A" + DOUBLE_SHARP).enharmonic shouldBe Note("B")
     Note("B" + DOUBLE_SHARP).enharmonic shouldBe Note("C#")
-    DoubleSharp().adjust(Note("C")) shouldBe Note("C" + DOUBLE_SHARP)
-    DoubleSharp().adjust(Note("Ab")) shouldBe Note("A#")
-    DoubleSharp().adjust(Note("D" + DOUBLE_FLAT)) shouldBe Note("D")
+    DoubleSharp.adjust(Note("C")) shouldBe Note("C" + DOUBLE_SHARP)
+    DoubleSharp.adjust(Note("Ab")) shouldBe Note("A#")
+    DoubleSharp.adjust(Note("D" + DOUBLE_FLAT)) shouldBe Note("D")
     Note("A" + DOUBLE_SHARP).toString shouldBe "A" + DOUBLE_SHARP
   }
 
   it should "handle double flats" in {
     Note("A" + DOUBLE_FLAT).enharmonic shouldBe Note("G")
     Note("C" + DOUBLE_FLAT).enharmonic shouldBe Note("Bb")
-    DoubleFlat().adjust(Note("D")) shouldBe Note("D" + DOUBLE_FLAT)
-    DoubleFlat().adjust(Note("G#")) shouldBe Note("Gb")
-    DoubleFlat().adjust(Note("A" + DOUBLE_SHARP)) shouldBe Note("A")
+    DoubleFlat.adjust(Note("D")) shouldBe Note("D" + DOUBLE_FLAT)
+    DoubleFlat.adjust(Note("G#")) shouldBe Note("Gb")
+    DoubleFlat.adjust(Note("A" + DOUBLE_SHARP)) shouldBe Note("A")
   }
 
   it should "handle degrees" in {
@@ -78,7 +78,41 @@ class NoteSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks
     flat3.adjust(e) shouldBe Note("Eb")
   }
 
+  it should "adjust notes in scales" in {
+    val sd = Degree("b6")
+    val c = Note("C")
+    val d = Degree("6")
+    sd.adjust(d).adjust(c) shouldBe Note("C#")
+  }
+
   it should "not care about case differences" in {
     Note("c") shouldBe Note("C")
+  }
+
+  it should "account for accidentals" in {
+    Note("C#") shouldNot be(Note("C"))
+  }
+
+  it should "handle enharmonic equivalence" in {
+    Note("B").enhEquals(Note("Cb")) shouldBe true
+    Note("A"+DOUBLE_SHARP).enhEquals(Note("B")) shouldBe true
+  }
+
+  it should "successfully compute intervals between notes" in {
+    forAll(NoteGenerator.noteGen, NoteGenerator.noteGen) { (n1, n2) =>
+      n1.interval(n2)
+    }
+  }
+
+  it should "successfully raise notes by an interval between notes" in {
+    forAll(NoteGenerator.noteGen, NoteGenerator.noteGen) { (n1, n2) =>
+      n1.raise(n1.interval(n2)) shouldBe n2
+    }
+  }
+
+  it should "successfully lower notes by an interval between notes" in {
+    forAll(NoteGenerator.noteGen, NoteGenerator.noteGen) { (n1, n2) =>
+      n1.lower(n2.interval(n1)) shouldBe n2
+    }
   }
 }

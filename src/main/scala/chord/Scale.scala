@@ -31,17 +31,37 @@ sealed trait Scale {
     }
   }
 
-  def notes: Seq[Note] = for {i <- intervals} yield noteMap(i)
+  //def notes: Seq[Note] = for {i <- intervals} yield noteMap(i)
+
+  def notes: Seq[Note] = semitones.take(semitones.length - 1).scanLeft(root)((n, s) => n.next(s))
 
   def relatedScale: Scale
 
-  def rotateLeft[A](l: List[A], n: Int = 1):List[A] = l.drop(n) ++ l.take(n)
+  private def rotateLeft[A](l: List[A], n: Int = 1):List[A] = l.drop(n) ++ l.take(n)
 
   def major = List(2,2,1,2,2,2,1)
   
   def genIntervals(n: Int): List[Int] = rotateLeft(major, n).scanLeft(0)(_+_).take(7)
 
   override def toString: String = s"$root $name"
+
+  def nearestNote(note: Note) = {
+    notes.find(n => n.name == note.name)
+  }
+
+  def semitone(note: Note): (Int, Int) = {
+    if (notes.contains(note)) (notes.indexOf(note)+1, 0)
+    else {
+      val nearest = nearestNote(note)
+      nearest.map{n => (notes.indexOf(n)+1, note.accidental.order - n.accidental.order)}
+        .getOrElse((0, 0))
+    }
+  }
+
+  def noteFromDegree(degree: Degree): Note = {
+    val note = notes(degree.value - 1)
+    degree.accidental.adjust(note)
+  }
 }
 
 case class Major(root: Note) extends Scale {

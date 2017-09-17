@@ -9,10 +9,10 @@ object NoteGenerator {
 
   val nGen: Gen[Char] = Gen.oneOf("ABCDEFG")
 
-  val accidentalGen: Gen[Char] = Gen.frequency(
-    (2, ' '),
-    (1, 'b'),
-    (1, '#')
+  val accidentalGen: Gen[String] = Gen.frequency(
+    (2, ""),
+    (1, "b"),
+    (1, "#")
   )
 
   val allSccidentalGen: Gen[String] = Gen.frequency(
@@ -25,10 +25,10 @@ object NoteGenerator {
   val noteWithAccidentalGen: Gen[Note] = for {
     r <- nGen
     a <- allSccidentalGen
-  } yield Note((r.toString + a).trim())
+  } yield Note(r.toString + a)
 
   val noteGen: Gen[Note] = for {
     r <- nGen
     a <- accidentalGen
-  } yield Note((r.toString + a).trim())
+  } yield Note(r.toString + a)
 }
