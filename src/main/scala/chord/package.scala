@@ -1,6 +1,7 @@
 //package chord
 
 import cats._
+import cats.implicits._
 
 import scala.language.implicitConversions
 
@@ -12,6 +13,12 @@ package object chord {
 
   val DOUBLE_FLAT = "\uD834\uDD2B"
   val DOUBLE_SHARP = "\uD834\uDD2A"
+
+  val mod12 = new util.Modulo(12)
+
+  val listOptFunc = Functor[List].compose[Option]
+
+  val listOptFold = Foldable[List].compose[Option]
 
   implicit val fretListShow: Show[FretList] = Show.show(_.map {_.getOrElse("x")}.mkString(" "))
 
@@ -70,7 +77,7 @@ package object chord {
   }
 
   val SEMI_TO_INT = Map(0 -> "R", 1 -> "♭9", 2 -> "9", 3 -> "♭3", 4 -> "3", 5 -> "11", 6 -> "♭5", 7 -> "5", 8 -> "♯5",
-                        9 -> "13", 10 -> "♭7", 11 -> "7")
+                        9 -> "13", 10 -> "♭7", 11 -> "7").map{case(k, v) => k -> Degree(v)}
 
   implicit val tuning = Tuning.StandardTuning
 
@@ -91,7 +98,7 @@ package object chord {
 
   def hasAccidental(n: String): Boolean = "♭b♯#°".toSet(n.head)
 
-  def norm(x: Int, b: Int = 12): Int = (x + b) % b
+  def norm(x: Int, b: Int = 12): Int = new util.Modulo(b)(x)
 
   //converts a space delimited string into a list, eliminating extraneous whitespace
   def delimitedToList(s: String): List[String] = s.trim.split(" ").toList.filter{!_.isEmpty}

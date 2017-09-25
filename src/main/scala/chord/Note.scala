@@ -131,6 +131,8 @@ case class Note(name: Char, accidental: Accidental) {
 case class Degree(value: Int, accidental: Accidental) {
   override def toString: String = s"${accidental}${if (value == 0) "R" else value}"
 
+  def isValid = true
+
   def adjust(note: Note): Note =
     accidental.adjust(note)
 
@@ -138,11 +140,45 @@ case class Degree(value: Int, accidental: Accidental) {
     Degree(degree.value, accidental.adjust(degree.accidental))
 
   def semitone: Int = {
-    val s = Major(Note("C")).intervals(if (value > 0) value - 1 else value)
+    val s = Major(Note("C")).intervals(
+      if (value > 0) {
+        if (value > 7) {
+          value - 8
+        } else {
+          value - 1
+        }
+      } else {
+        value
+      })
     accidental match {
       case Sharp => s + 1
       case Flat => s - 1
       case _ => s
+    }
+  }
+
+  def next(semitones: Int): Degree = {
+    require(semitones > 0 && semitones < 4)
+    val deg = if (value == 0) 2 else value + 1
+    semitones match {
+      case 1 =>
+        if (value == 3 || value == 7) {
+          Degree(deg, this.accidental)
+        } else {
+          Degree(deg, this.accidental.lower)
+        }
+      case 2 =>
+        if (value == 3 || value == 7) {
+          Degree(deg, this.accidental.raise)
+        } else {
+          Degree(deg, this.accidental)
+        }
+      case 3 =>
+        if (value == 3 || value == 7) {
+          Degree(deg, this.accidental.raise.raise)
+        } else {
+          Degree(deg, this.accidental.raise)
+        }
     }
   }
 }
@@ -218,6 +254,7 @@ case object Flat extends Accidental {
       case DoubleFlat => Flat
       case Flat => Natural
       case Natural => Sharp
+      case Dim => Flat
     }
 
   override val lower: Accidental = DoubleFlat
@@ -258,6 +295,23 @@ case object DoubleFlat extends Accidental {
   override val lower: Accidental = Flat
 }
 
+case object Dim extends Accidental {
+  override def toString: String = "°"
+
+  override val order: Int = -2
+
+  override def adjust(note: Note): Note = {
+    note.accidental match {
+      case Natural => new Note(note.name, DoubleFlat)
+      case Sharp => new Note(note.name, Flat)
+      case DoubleSharp => new Note(note.name, Natural)
+    }
+  }
+
+  override val raise: Accidental = Flat
+  override val lower: Accidental = Flat
+}
+
 object Note {
   def apply(n: String): Note = {
     new Note(n.head.toTitleCase, Accidental(n.tail))
@@ -278,9 +332,10 @@ object Accidental {
       s match {
         case "♭" | "b" => Flat
         case "♯" | "#" => Sharp
-        case "°" | DOUBLE_FLAT => DoubleFlat
+        case "°" => Dim
+        case DOUBLE_FLAT => DoubleFlat
         case DOUBLE_SHARP => DoubleSharp
-        case _ => null
+        case _ => Natural
       }
     }
   }
@@ -288,11 +343,13 @@ object Accidental {
 
 object Degree {
   def apply(s: String): Degree = {
-    val accidental = if (s.head.isDigit || s == "R") Natural else Accidental(s.takeWhile(c => !c.isDigit))
-    val value = if (accidental != Natural) s.tail.toInt else {
-      if (s.head.isDigit) s.toInt else 0
-    }
-    new Degree(value, accidental)
+    DegreeParser(s).head
   }
+
+  def apply(value: Int, accidental: Accidental): Degree = new Degree(value, accidental)
+}
+
+object InvalidDegree extends Degree(0, Natural) {
+  override val isValid = false
 }
 

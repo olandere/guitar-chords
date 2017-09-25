@@ -70,6 +70,12 @@ class NoteSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks
 
   it should "handle degrees" in {
     Degree("b3").toString shouldBe "♭3"
+    Degree("#4").semitone shouldBe 6
+    Degree("3").semitone shouldBe 4
+  }
+
+  it should "handle extended degrees" in {
+    Degree("#11").semitone shouldBe 6
   }
 
   it should "adjust notes for altered degrees" in {
@@ -114,5 +120,10 @@ class NoteSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks
     forAll(NoteGenerator.noteGen, NoteGenerator.noteGen) { (n1, n2) =>
       n1.lower(n2.interval(n1)) shouldBe n2
     }
+  }
+
+  "accidentals" should "be ordered" in {
+    Natural < Sharp shouldBe true
+    Flat < Natural shouldBe true
   }
 }

@@ -7,8 +7,8 @@ class ShellChord(chord: Chord)
 extends Chord(chord.root, chord.triad, chord.quality, chord.extension, chord.alteration, chord.added,
               chord.suspension, chord.altRoot) {
 
-  override def intervals(extensions: => List[String] = List(extension.toString)): List[String] = {
-    chord.intervals(extensions).filterNot(_.contains("5"))
+  override def intervals(extensions: => List[Degree] = List(Degree(extension, Natural))): List[Degree] = {
+    chord.intervals(extensions).filterNot(_ == Degree("5"))
   }
 
   //override def extensions = {println("shell"); List(extension.toString)}

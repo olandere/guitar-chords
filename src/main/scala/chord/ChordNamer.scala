@@ -160,7 +160,7 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning) exten
 
   private def suspension: String = {
     if (no3rd) {
-      if (has9) "sus2" else if (has11) "sus4" else ""
+      if (has9) "sus2" else if (has11) "sus4" else "no3"
 
     } else ""
   }

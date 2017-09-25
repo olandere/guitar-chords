@@ -1,6 +1,5 @@
 package chord
 
-import cats.{Foldable, Functor}
 import cats.implicits._
 
 import scala.annotation.tailrec
@@ -10,10 +9,7 @@ import scala.annotation.tailrec
  */
 object Operations {
 
-  private val fretListFold = Foldable[List].compose[Option]
-  private val listOptFunc = Functor[List].compose[Option]
-
-  def generatePermutations(chord: Chord, withRepetition: Boolean = true)(implicit tuning: Tuning): Iterator[FretList] = {
+  private def generatePermutations(chord: Chord, withRepetition: Boolean = true)(implicit tuning: Tuning): Iterator[FretList] = {
     val semitones = (if (chord.altRoot.isDefined && !chord.semitones.contains(chord.altRootInterval.get)) {
       chord.semitones ++ chord.altRootInterval.toList
     } else {
@@ -35,7 +31,7 @@ object Operations {
   }
 
   private def withinSpan(fretSpan: Int)(c: FretList): Boolean = {
-    val m = fretListFold.filter_(c)(_ > 0)
+    val m = listOptFold.filter_(c)(_ > 0)
     if (m.isEmpty) {
       false
     } else {
@@ -45,7 +41,7 @@ object Operations {
 
   def adjustOctave2(c: FretList): FretList = {
     def fretspan(f: FretList): Int = {
-      val m = fretListFold.filter_(f) { _ => true }
+      val m = listOptFold.filter_(f) { _ => true }
       if (m.isEmpty) 0 else m.max - m.min
     }
 
@@ -75,16 +71,16 @@ object Operations {
   }
 
   @tailrec
-  def adjustOctave(c: FretList): FretList = {
+  private def adjustOctave(c: FretList): FretList = {
 
     def fretspan(f: FretList): Int = {
-      val m = fretListFold.filter_(f) {
+      val m = listOptFold.filter_(f) {
         _ > 0
       }
       m.max - m.min
     }
 
-    val m = fretListFold.filter_(c) { _ => true }
+    val m = listOptFold.filter_(c) { _ => true }
     val r = if (m.min < 0) {
       listOptFunc.map(c) { x: Int => x + 12 }
     } else if (m.min >= 12) {
@@ -92,7 +88,7 @@ object Operations {
     } else {
       c
     }
-    val m2 = fretListFold.filter_(r)(_ => true).sorted
+    val m2 = listOptFold.filter_(r)(_ => true).sorted
     val span = m2.max - m2.filter {
       _ > 0
     }.min
@@ -116,6 +112,14 @@ object Operations {
     if (result == c || fretspan(result) >= fretspan(c)) c else adjustOctave(result)
   }
 
+  /**
+    *
+    * @param chord
+    * @param fretSpan
+    * @param jazzVoicing
+    * @param tuning
+    * @return
+    */
   def fingerings(chord: Chord, fretSpan: Int = 6, jazzVoicing: Boolean = false)(implicit tuning: Tuning): List[FretList] = {
 
     def transpose(c: FretList) = listOptFunc.map(c) { n => n + retune(tuning)(chord.root) }
@@ -145,9 +149,8 @@ object Operations {
     chord.filterFingerings({
       val r = generatePermutations(chord, !jazzVoicing).toSet.filter(alteredRoot)
         .map(_.zip(tuning.semitones)).map {
-        _.map { a: Tuple2[Option[Int], Int] => a._1.map { x => norm(x - a._2) } }
-      }
-        .toList
+        _.map { a: (Option[Int], Int) => a._1.map { x => norm(x - a._2) } }
+      }.toList
       //    r.foreach{x=>println(x)}
       //      println("---")
       val r2 = r.map { c =>
@@ -224,12 +227,20 @@ object Operations {
       //println(ints)
       val namer = ChordNamer(chord) //, ints.map{_.toList}.flatten)
       //println(s"$namer")
-      (namer.intervals map (_.map(if (namer.isDiminishedSeventh) SEMI_TO_INT + (9 -> "°7") else SEMI_TO_INT).getOrElse("x")),
+      (namer.intervals map (_.map(if (namer.isDiminishedSeventh) SEMI_TO_INT + (9 -> Degree("°7")) else SEMI_TO_INT).map(_.toString).getOrElse("x")),
         namer.toString,
         notes(Chord(namer.toString))(fl)) //.mkString(" ")
     } else (Nil, chord, Nil)
   }
 
+  /**
+    *
+    * @param chords
+    * @param fretSpan
+    * @param jazzVoicing
+    * @param tuning
+    * @return
+    */
   def progression(chords: List[Chord], fretSpan: Int, jazzVoicing: Boolean = false)(implicit tuning: Tuning): List[List[FretList]] = {
 
     def proximitySort(f: FretList, fl: List[FretList]): List[FretList] = {
@@ -265,6 +276,12 @@ object Operations {
     //    } yield (f1, f2)
   }
 
+  /**
+    *
+    * @param scale
+    * @param tuning
+    * @return
+    */
   def fingering(scale: Scale)(implicit tuning: Tuning): List[List[Int]] = {
     for {
       root <- tuning.notes
@@ -272,14 +289,20 @@ object Operations {
         _ + retune(root)(scale.root)
       }
     }
-      yield (frets ++ frets.map(_ % 12)).sorted.distinct.filter(_ < 16)
+      yield (frets ++ frets.map(mod12(_))).sorted.distinct.filter(_ < 16)
   }
 
+  /**
+    *
+    * @param chord
+    * @param tuning
+    * @return
+    */
   def possibleScales(chord: Chord)(implicit tuning: Tuning): List[Scale] = {
     Scale.allScales(chord.root).filter(_.containsChord(chord))
   }
 
-  def combWithRepeat[T](input: List[T], length: Int): List[List[T]] = {
+  private def combWithRepeat[T](input: List[T], length: Int): List[List[T]] = {
 
     def helper(inSet: List[T], result: List[T], len: Int): List[List[T]] = {
       if (len == 0) {
@@ -294,67 +317,87 @@ object Operations {
     helper(input, Nil, length)
   }
 
+  /**
+    *
+    * @param chord
+    * @param frets
+    * @return
+    */
   def notes(chord: Chord)(frets: FretList): NoteList = {
 
-    val scale = if (chord.isMinor) {
-      CircleOfFifths.minorScale(chord.root).zip(CircleOfFifths.minScaleDegrees)
-    } else {
-      CircleOfFifths.majorScale(chord.root).zip(CircleOfFifths.majScaleDegrees)
+    val scale = {
+      val sc = if (!chord.isMinor || chord.isPitchClassSet) {
+        Major(chord.root)
+      } else {
+        Aeolian(chord.root)
+      }
+      sc.notes.zip(sc.degrees)
     }
 
     def applyAccidental(n: Note, d: Degree, sd: Degree): Note = {
-      //      val note = Note(n)
-      // val degree = Degree(d)
- //     println(s"$n, $d")
+      println(s"n: $n, d: $d, sd: $sd")
       sd.adjust(d).adjust(n)
-
-      //      if (hasAccidental(d)) {
-      //        if (n.length == 1) n + d.head else {
-      //          if (d.head.toString != n.tail) n.head.toString
-      //          else if (n.tail == "#") n.head + DOUBLE_SHARP else n.head + DOUBLE_FLAT
-      //        }
-      //      } else n
     }
 
-    listOptFunc.map(chord.asDegrees(frets)) { d: Degree =>
+    val r = listOptFunc.map(chord.asDegrees(frets)) { d: Degree =>
       scale(d match {
         //case Degree("R", None) => 0
         case Degree(n, _) => if (n < 8 && n > 0) n - 1 else n % 8
         //        def f(n: Int) = if (n < 8) n - 1 else n % 8
         //        if (n.accidental.isDefined) f(n.tail.toInt) else f(n.toInt)
       })
-    }.zip(chord.asDegrees(frets)).map { p =>
+    }
+    r.zip(chord.asDegrees(frets)).map { p =>
       if (p._1.isDefined) Some(applyAccidental(p._1.get._1, p._2.get, p._1.get._2)) else None
     }
   }
 
+  /**
+    *
+    * @param root
+    * @param tuning
+    * @return
+    */
   def roots(root: Note)(implicit tuning: Tuning): List[Int] = {
     if (root.isValid) {
       for {
         note <- tuning.notes
-      } yield (retune(note)(root) + 12) % 12
+      } yield mod12(retune(note)(root))
     } else Nil
   }
 
+  /**
+    *
+    * @param chord
+    * @param tuning
+    * @return
+    */
   def arpeggio(chord: Chord)(implicit tuning: Tuning): List[List[Int]] = {
     if (chord.isValid) {
       for {
         root <- tuning.notes
         frets = (chord.semitones ++ chord.semitones.map(_ + 12)).map {
           _ + retune(root)(chord.root)
-        }.map{n => (n + 12) % 12}
+        }.map{mod12(_)}
       } yield //(frets ++ frets.map{n => (n + 12) % 12}).sorted.distinct.filter(_ < 13)
         (frets ++ (if (frets.contains(0)) List(12) else Nil)).sorted.distinct.filter(_ < 13)
     } else Nil
   }
 
+  /**
+    *
+    * @param scaleRoot
+    * @param semitones
+    * @param tuning
+    * @return
+    */
   def scaleFingering(scaleRoot: Note, semitones: List[Int])(implicit tuning: Tuning): List[List[Int]] = {
     val scale = Stream.continually(semitones).flatten.scanLeft(0)(_+_).take(12*tuning.numStrings)
     for {
       root <- tuning.notes
       frets = (scale ++ scale.map(_ + 12)).map {
         _ + retune(root)(scaleRoot)
-      }.map{n => (n + 12) % 12}
+      }.map{mod12(_)}
     } yield (frets ++ (if (frets.contains(0)) List(12) else Nil)).sorted.distinct.filter(_ < 13).toList
   }
 }
