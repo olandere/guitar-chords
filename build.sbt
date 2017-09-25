@@ -3,7 +3,7 @@ settings(
   name := "chords",
   organization := "chords",
   version := "1.0",
-  scalaVersion := "2.12.2",
+  scalaVersion := "2.12.3",
   scalacOptions ++= Seq("-deprecation", "-feature"),
   parallelExecution in Test := false,
 
@@ -13,7 +13,7 @@ settings(
     "org.scalatest" %% "scalatest" % "3.0.1" % "test",
     "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
     "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.5",
-    "org.typelevel" %% "cats" % "0.9.0"
+    "org.typelevel" %% "cats-core" % "1.0.0-MF"
   ),
 
   publishMavenStyle := true,
