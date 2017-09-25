@@ -9,7 +9,8 @@ import org.scalatest._
  */
 class OperationsSpec extends FlatSpec with Matchers with Inspectors {
 
-  "Fingerings" should "generate known fingerings" in {
+  "Fingerings" should "generate known fingerings" in
+    {
 
     fingerings(Chord("E-9").asShell, 3).map{_.show} should contain("x 7 5 7 7 x")
     fingerings(Chord("D-9").asShell, 3).map{_.show} should contain("x 5 3 5 5 x")
@@ -198,7 +199,7 @@ class OperationsSpec extends FlatSpec with Matchers with Inspectors {
   }
 
   it should "name notes from fingering" in {
-    //chords("6x776x") should matchPattern { case (_, "B♭M7", _) => }
+    chords("6x776x") should matchPattern { case (_, "A♯M7", _) => }
     chords("097000") should matchPattern { case (_, "Emadd9add11", _) => }
     chords("x01x12") should matchPattern { case (List("x", "R", "♭5", "x", "♭3", "°7"), "Adim7", _) => }
     chords("xx1212") should matchPattern { case (_, "D♯dim7", List(None, None, Some(Note('D', Sharp)),
@@ -230,10 +231,17 @@ class OperationsSpec extends FlatSpec with Matchers with Inspectors {
   }
 
   it should "generate valid arpeggios" in {
-    arpeggio(Chord("E")).apply(0) shouldBe List(0, 4, 7, 12)
+    arpeggio(Chord("E")).head shouldBe List(0, 4, 7, 12)
   }
 
   it should "handle dim chord inversions" in {
     chords("2 x 1 x 1 x")
+  }
+
+  it should "name notes for pitch set chords" in {
+    val c = Chord("{0 4 6 7}")
+    val f = Operations.fingerings(c, 6, true)
+    println(f.head.show)
+    Operations.notes(c)(f.head).show shouldBe "E x x G C F♯"
   }
 }

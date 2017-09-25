@@ -14,7 +14,7 @@ sealed trait Scale {
   def intervals: List[Int]
 
   def semitones: List[Int] = intervals.zip(intervals.tail :+ intervals.head)
-    .map { case (a, b) => ((b - a) + 12) % 12 }
+    .map { case (a, b) => mod12(b - a) }
 
   def containsChord(chord: Chord): Boolean = {
     val semitones = chord.semitones.map { s => norm(s + retune(root)(chord.root)) }
@@ -34,6 +34,8 @@ sealed trait Scale {
   //def notes: Seq[Note] = for {i <- intervals} yield noteMap(i)
 
   def notes: Seq[Note] = semitones.take(semitones.length - 1).scanLeft(root)((n, s) => n.next(s))
+
+  def degrees: Seq[Degree] = semitones.take(semitones.length - 1).scanLeft(Degree("R"))((d, s) => d.next(s))
 
   def relatedScale: Scale
 
@@ -59,7 +61,10 @@ sealed trait Scale {
   }
 
   def noteFromDegree(degree: Degree): Note = {
-    val note = notes(degree.value - 1)
+    val note = if (degree.value == 0) notes.head
+    else if (degree.value > 7) notes(degree.value - 8)
+    else
+      notes(degree.value - 1)
     degree.accidental.adjust(note)
   }
 }
@@ -171,12 +176,12 @@ case class MajorPentatonic(root: Note) extends Scale {
   def relatedScale: Scale = Major(noteMap(0))
 }
 
-case class ScaleByDegrees(root: Note, degrees: List[Degree]) extends Scale {
-  override def intervals: List[Int] = List(0) ++ degrees.map(_.semitone)
+case class ScaleByDegrees(root: Note, deg: List[Degree]) extends Scale {
+  override def intervals: List[Int] = List(0) ++ deg.map(_.semitone)
 
   def relatedScale: Scale = this
 
-  override def toString: String = s"$root ${degrees.mkString(" ")}"
+  override def toString: String = s"$root ${deg.mkString(" ")}"
 }
 
 object Scale {

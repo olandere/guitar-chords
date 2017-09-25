@@ -8,6 +8,9 @@ object CircleOfFifths {
   val flatKeys: Seq[Note] = flats.tail.takeWhile(k => k == "F" || k.contains("b")).take(7).map(Note.apply).toSeq
   private val allNotes = (CircleOfFifths.flats.reverse ++ CircleOfFifths.sharps).distinct.map(Note.apply)
 
+  def fifths(n: Note):Stream[Note] = n #:: fifths(n.raise(Interval("P5")))
+  //private val allNotes =
+
   val mapping = {
     val m = allNotes.toList.drop(12).zip(allNotes.toList)
     m.toMap.orElse(m.map(_.swap).toMap)

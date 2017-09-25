@@ -24,4 +24,12 @@ class ChordParserSpec extends FlatSpec with Matchers {
   it should "handle multiple adds" in {
     ChordParser("Gadd9add11") should be (List(Chord("Gadd9add11")))
   }
+
+  it should "handle integer notation" in {
+    ChordParser("{0 1 4 6 8}").head.toString shouldBe "{0 1 4 6 8}"
+  }
+
+  it should "handle integer notation with root" in {
+    ChordParser("A {0 1 4 6 8}").head.toString shouldBe "A{0 1 4 6 8}"
+  }
 }

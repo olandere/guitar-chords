@@ -40,6 +40,12 @@ object Tuning {
     val semitones = notes.map { n => norm(NOTE_MAP(Note(n)) - NOTE_MAP(root)) }
     new Tuning(semitones, root)
   }
+
+//  def apply(notes: List[Note]): Tuning = {
+//    val root = notes.head
+//    val semitones = notes.map { n => norm(NOTE_MAP(n) - NOTE_MAP(root)) }
+//    new Tuning(semitones, root)
+//  }
 }
 
 
