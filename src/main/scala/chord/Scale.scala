@@ -23,7 +23,7 @@ sealed trait Scale {
 
   //val preferSharps = Set("G", "D", "A", "E", "B").contains(root) || root.contains("♯")
   val noteMap: Map[Int, Note] = {
-    val mapping = reverseNoteMap(root, !CircleOfFifths.flatKeys.contains(root))
+    val mapping = reverseNoteMap(root, isSharpKey)
     if (intervals.map(mapping).toSet.size != 7) {
       reverseNoteMap(root, preferSharps = false)
     } else {
@@ -34,6 +34,8 @@ sealed trait Scale {
   //def notes: Seq[Note] = for {i <- intervals} yield noteMap(i)
 
   def notes: Seq[Note] = semitones.take(semitones.length - 1).scanLeft(root)((n, s) => n.next(s))
+
+  def isSharpKey: Boolean = notes.exists(n => n.accidental == Sharp)
 
   def degrees: Seq[Degree] = semitones.take(semitones.length - 1).scanLeft(Degree("R"))((d, s) => d.next(s))
 

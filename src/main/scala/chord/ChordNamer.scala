@@ -5,7 +5,8 @@ import grizzled.slf4j.Logging
 /**
  * Created by eolander on 2/17/15.
  */
-class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning) extends Logging {
+class ChordNamer(val fl: FretList, val root: Note, val rootVal: Int, val alteredRoot: Option[Note] = None)(implicit tuning: Tuning) extends
+  Logging {
   import ChordNamer._
 
  // println(s"fl: $fl, root: $root")
@@ -14,7 +15,7 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning) exten
                            6 -> 5, 7 -> 5, 8 -> 6, 9 -> 6, 10 -> 7, 11 -> 7)
 
   lazy val intervals: FretList = {
-    fl.zip(tuning.semitones).map{case (Some(n), t) => Some(norm(n+t-root)); case (None, _) => None}//.filterNot(_ == None).map(_.get)//.sorted
+    fl.zip(tuning.semitones).map{case (Some(n), t) => Some(norm(n+t-rootVal)); case (None, _) => None}//.filterNot(_ == None).map(_.get)//.sorted
   }
 
   private def hasMinorThird = intervals.contains(Some(3))
@@ -54,6 +55,8 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning) exten
   private def hasExtensions = has9 || has11 || has13
 
   private def isAugmented = hasMajorThird && hasAugFifth
+
+  def tryAltRoot: Boolean = alteredRoot.isEmpty && no3rd && hasMajSeven
 
   def apply(): String = {
     if (isDiminishedSeventh) "dim7"
@@ -103,7 +106,7 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning) exten
     if (!has7) {
       (if (has13 && !isDiminishedSeventh) {if (!has7) "6" else "13"} else "") +
       (if (has9 && !no3rd) "add9" else "") +
-      (if (has11 && !no3rd) "add11" else "")
+      (if (has11 && !no3rd && !alteredRoot.exists(_ == Major(root).noteFromDegree(Degree("4")))) "add11" else "")
     } else ""
   }
 
@@ -116,8 +119,8 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning) exten
     //  info(fretListToIntList(intervals.distinct).sorted map SEMI_TO_DEGREE)
     fretListToIntList(intervals.distinct).sorted map SEMI_TO_DEGREE match {
       case List(0, 3, 5) | List(0, 3, 5, 7) => "root" // case classes???
-      case List(0, 3, 6) | List(0, 3, 5, 6) => "1st"
-      case List(0, 4, 6) | List(0, 3, 4, 6) => "2nd"
+      case List(0, 3, 6) | List (0, 2, 3, 6) | List(0, 3, 5, 6) => "1st"
+      case List(0, 4, 6) | List(0, 4, 6, 7) | List(0, 3, 4, 6) => "2nd"
       case List(0, 2, 4, 6) | List(0, 2, 5, 6) => "3rd" // try to handle tritone
 //      case List(0, 3, 6) => "dim"
 //      case List(0, 3, 6, 9) => "dim7"
@@ -143,10 +146,12 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning) exten
       case "3rd" => 2
       case _ => 0
     }
-    val root = getRoot(fl.zip(tuning.semitones), intervals, newRoot)
+    val rootVal = getRoot(fl.zip(tuning.semitones), intervals, newRoot)
+    val root = reverseNoteMap(tuning.root)(rootVal)
+
    // val ints = intervals(fl, root)
    // println(this)
-    new ChordNamer(fl, root)
+    new ChordNamer(fl, root, rootVal, alteredRoot)
   }
 
   def alterations: String = {
@@ -167,12 +172,12 @@ class ChordNamer(val fl: FretList, val root: Int)(implicit tuning: Tuning) exten
 
   override def toString: String = {
    // val preferSharps = Set("G", "D", "A", "E", "B").contains(root) || root.contains("♯")
-    reverseNoteMap(tuning.root)(root) +
+    root + //reverseNoteMap(tuning.root)(root) +
     quality +
     intervalNumber +
     addedIntervals +
     alterations +
-    suspension
+    suspension + (if (alteredRoot.isDefined) s"/${alteredRoot.get}" else "")
   }
 }
 
@@ -181,6 +186,12 @@ object ChordNamer {
 //    new ChordNamer(Chord.unapply(chord).map(_))()
 
   def fretListToIntList(fl: FretList): List[Int] = fl.flatMap{_.toList}.sorted
+
+  def getRoot(fl: FretList, tuning: List[Int], tuningRoot: Note): (Note, Int) = {
+    if (fl.head.isDefined) {
+    val rootVal = norm(fl.head.get+tuning.head)
+     (reverseNoteMap(tuningRoot)(rootVal), rootVal) } else getRoot(fl.tail, tuning.tail, tuningRoot)
+  }
 
 //  def intervals(fl: FretList, root: Int) = {
 //    fl.zip(tuning.semitones).map{case (Some(n), t) => Some(norm(n+t-root)); case (None, _) => None}//.filterNot(_ == None).map(_.get)//.sorted
@@ -195,11 +206,21 @@ object ChordNamer {
   }
 
   def apply(fl: FretList)(implicit tuning: Tuning): ChordNamer = {
-    def getRoot(fl: FretList, tuning: List[Int]): Int = {
-      if (fl.head.isDefined) norm(fl.head.get+tuning.head) else getRoot(fl.tail, tuning.tail)
-    }
-    val root = getRoot(fl, tuning.semitones)
+
+    val (root, rootVal) = getRoot(fl, tuning.semitones, tuning.root)
     //val ints = intervals(fl, root)
-    new ChordNamer(fl, root)//.respell //fretListToIntList(ints))
+    new ChordNamer(fl, root, rootVal)//.respell //fretListToIntList(ints))
+  }
+
+  def asAlteredRoot(fingering: String)(implicit tuning: Tuning): ChordNamer = {
+    //reverseNoteMap(tuning.root)(alteredRoot.get)
+    def removeRoot(fl: FretList): FretList = fl.takeWhile(_.isEmpty) ++ List(None) ++ fl.dropWhile(_.isEmpty).tail
+
+    val fl = Chord.unapply(fingering)
+    val (altRoot, _) = getRoot(fl, tuning.semitones, tuning.root)
+    val nfl = removeRoot(fl)
+    val (newRoot, rootVal) = getRoot(nfl, tuning.semitones, tuning.root)
+    new ChordNamer(fl, newRoot, rootVal, Option(altRoot)).respell
+
   }
 }
