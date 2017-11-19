@@ -110,7 +110,7 @@ class ChordSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyCheck
     val em = Chord.unapply("0 x 0 0 x 7")
     val c7 = Chord.unapply("0 3 x 0 0 x")
     val c = diff(em, c7)
-    println(c)
+   // println(c)
   }
 
   it should "handle suspensions" in {
@@ -126,12 +126,12 @@ class ChordSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyCheck
     Chord("C7b13").semitones shouldBe List(0, 4, 7, 10, 8)
   }
 
-  it should "handle random chords" in {
-    forAll(ChordGenerator.chordGen) { (c) =>
-      println(s"c: $c")
-      Chord(c).semitones shouldBe List(0, 4, 7)
-    }
-  }
+//  it should "handle random chords" in {
+//    forAll(ChordGenerator.chordGen) { (c) =>
+//      println(s"c: $c")
+//      Chord(c).semitones shouldBe List(0, 4, 7)
+//    }
+//  }
 
   it should "handle invalid chords" in {
     Chord("D77") shouldBe InvalidChord
