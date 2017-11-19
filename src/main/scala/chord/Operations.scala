@@ -223,9 +223,13 @@ object Operations {
 
     val fl = Chord.unapply(chord)
     if (fl.nonEmpty) {
-      val ints = intervals(fl, getRoot(fl, tuning.semitones))
+      val namer = {
+        val cn = ChordNamer(chord)
+        if (cn.tryAltRoot) ChordNamer.asAlteredRoot(chord) else cn
+      }
+      //val ints = intervals(fl, getRoot(fl, tuning.semitones))
       //println(ints)
-      val namer = ChordNamer(chord) //, ints.map{_.toList}.flatten)
+       //, ints.map{_.toList}.flatten)
       //println(s"$namer")
       (namer.intervals map (_.map(if (namer.isDiminishedSeventh) SEMI_TO_INT + (9 -> Degree("°7")) else SEMI_TO_INT).map(_.toString).getOrElse("x")),
         namer.toString,

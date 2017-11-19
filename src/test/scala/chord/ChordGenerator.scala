@@ -7,15 +7,14 @@ import org.scalacheck.Gen
   */
 object ChordGenerator {
 
-  val rootGen = Gen.oneOf("ABCDEFG")
-  val accidentalGen = Gen.frequency(
-    (2, ' '),
-    (1, 'b'),
-    (1, '#')
-  )
+  val triadGen: Gen[String] = Gen.oneOf("m", "-", "+", "aug", "dim", "°", "")
 
-  val chordGen = for {
-    r <- rootGen
-    a <- accidentalGen
-  } yield (r.toString + a).trim()
+  val chordNameGen: Gen[String] = for {
+    r <- NoteGenerator.noteGen
+    t <- triadGen
+  } yield List(r.toString, t).mkString //, Operations.fingerings(Chord(r + a + t)))
+
+  val chordGen: Gen[Chord] = for {
+    c <- chordNameGen
+  } yield Chord(c)
 }

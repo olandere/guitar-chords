@@ -1,13 +1,27 @@
 package chord
 
 import cats.implicits._
+import chord.ChordGenerator.chordGen
 import chord.Operations._
+import org.scalacheck.Shrink
 import org.scalatest._
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
 /**
  * Created by eolander on 2/17/15.
  */
-class ChordNamerSpec extends FlatSpec with Matchers {
+class ChordNamerSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks {
+
+  implicit override val generatorDrivenConfig =
+    PropertyCheckConfiguration(minSuccessful = 50)
+
+  implicit val stringNoShrink = Shrink[String] {
+    _ => Stream.empty
+  }
+
+  implicit val chordNoShrink = Shrink[Chord] {
+    _ => Stream.empty
+  }
 
   "ChordNamer" should "identify chords" in {
     //assert(ChordNamer(chords("1 3 3 1 1 1")) == "m")
@@ -96,5 +110,27 @@ class ChordNamerSpec extends FlatSpec with Matchers {
 
   it should "handle jimi hendrix chord" in {
     ChordNamer("x7678x").toString shouldBe "E7♯9"
+  }
+
+  it should "handle altered roots" in {
+    ChordNamer.asAlteredRoot("x x 0 9 10 9").toString shouldBe "A/D"
+    ChordNamer.asAlteredRoot("1x2010").toString shouldBe "C/F"
+  }
+
+  ignore should "name random chords" in {
+    forAll(chordGen) { (c) =>
+      println(s"chord: $c")
+    //  t._2.toString shouldBe t._1
+    //  val chord = Chord(c)
+//      assert(chord.isValid)
+      val ns = fingerings(c).map{ x => ChordNamer(x.show).toString}.map(Chord(_)).toSet
+
+      println(s"chord set: $ns")
+      ns.size shouldBe 1
+      ns should contain(c)
+
+   //   assert(fingerings(chord).forall {ch => ChordNamer(ch.show).toString == t._1})
+//      assert(ChordNamer(fingerings(chord).head.show).toString == c)
+    }
   }
 }
