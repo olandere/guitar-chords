@@ -8,7 +8,8 @@ object CircleOfFifths {
   val flatKeys: Seq[Note] = flats.tail.takeWhile(k => k == "F" || k.contains("b")).take(7).map(Note.apply).toSeq
   private val allNotes = (CircleOfFifths.flats.reverse ++ CircleOfFifths.sharps).distinct.map(Note.apply)
 
-  def fifths(n: Note):Stream[Note] = n #:: fifths(n.raise(Interval("P5")))
+  def fifths(n: Note): Stream[Note] = n #:: fifths(n.raise(Interval("P5")))
+
   //private val allNotes =
 
   val mapping = {
@@ -35,14 +36,11 @@ object CircleOfFifths {
 
   def majorScale(key: Note): Seq[Note] = {
     val root = if (useEnharmonic(key)) key.enharmonic else key
-    //println(s"key: $key, root: $root")
-    //majScale.map(i => allNotes(allNotes.indexOf(root) + i))
     Major(key).notes
   }
 
   def minorScale(key: Note): List[Note] = {
     val root = if (useEnharmonic(key, Note("A"))) key.enharmonic else key
-    //println(s"key: $key, root: $root")
     minScale.map(i => allNotes(allNotes.indexOf(root) + i))
   }
 
@@ -51,5 +49,4 @@ object CircleOfFifths {
   case class Sharp(num: Int) extends KeySignature
 
   case class Flat(num: Int) extends KeySignature
-
 }

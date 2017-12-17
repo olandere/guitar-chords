@@ -11,9 +11,6 @@ import scala.util.parsing.combinator._
 
 trait ChordParser extends RegexParsers {
 
-//  def chord : Parser[Chord] =  """([ABCDEFG][♯#b♭]?)(m|-|\+|aug|dim|°)?(M|maj)?(6|7|9|11|13)?(([♯#b♭](5|9|11))*)(add(9|11|13))?(sus(2|4))?(/([ABCDEFG][♯#b♭]?))?"""
-//               .r ^^ {c => Chord(c)}
-
   val root : Parser[String] = """[ABCDEFG][♯#b♭]?""".r ^^ {_.toString}
   val triad : Parser[String] = """m|-|\+|aug|dim|°""".r ^^ {_.toString}
   val quality: Parser[String] = """M|maj""".r ^^ {_.toString}

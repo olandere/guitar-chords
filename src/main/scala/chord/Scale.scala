@@ -1,8 +1,8 @@
 package chord
 
 /**
- * Created by eolander on 3/22/15.
- */
+  * Created by eolander on 3/22/15.
+  */
 sealed trait Scale {
 
   import Scale._
@@ -41,32 +41,37 @@ sealed trait Scale {
 
   def relatedScale: Scale
 
-  private def rotateLeft[A](l: List[A], n: Int = 1):List[A] = l.drop(n) ++ l.take(n)
+  private def rotateLeft[A](l: List[A], n: Int = 1): List[A] = l.drop(n) ++ l.take(n)
 
-  def major = List(2,2,1,2,2,2,1)
-  
-  def genIntervals(n: Int): List[Int] = rotateLeft(major, n).scanLeft(0)(_+_).take(7)
+  def major: List[Int] = List(2, 2, 1, 2, 2, 2, 1)
+
+  def genIntervals(n: Int): List[Int] = rotateLeft(major, n).scanLeft(0)(_ + _).take(7)
 
   override def toString: String = s"$root $name"
 
-  def nearestNote(note: Note) = {
+  def nearestNote(note: Note): Option[Note] = {
     notes.find(n => n.name == note.name)
   }
 
   def semitone(note: Note): (Int, Int) = {
-    if (notes.contains(note)) (notes.indexOf(note)+1, 0)
-    else {
+    if (notes.contains(note)) {
+      (notes.indexOf(note) + 1, 0)
+    } else {
       val nearest = nearestNote(note)
-      nearest.map{n => (notes.indexOf(n)+1, note.accidental.order - n.accidental.order)}
-        .getOrElse((0, 0))
+      nearest.map { n => (notes.indexOf(n) + 1, note.accidental.order - n.accidental.order) }.getOrElse((0, 0))
     }
   }
 
   def noteFromDegree(degree: Degree): Note = {
-    val note = if (degree.value == 0) notes.head
-    else if (degree.value > 7) notes(degree.value - 8)
-    else
-      notes(degree.value - 1)
+    val note = if (degree.value == 0) {
+      notes.head
+    } else {
+      if (degree.value > 7) {
+        notes(degree.value - 8)
+      } else {
+        notes(degree.value - 1)
+      }
+    }
     degree.accidental.adjust(note)
   }
 }
@@ -96,7 +101,7 @@ case class MelodicMinor(root: Note) extends Scale {
 
 case class Dorian(root: Note) extends Scale {
 
-  def intervals: List[Int] = genIntervals(1)//List(2,1,2,2,2,1,2)
+  def intervals: List[Int] = genIntervals(1) //List(2,1,2,2,2,1,2)
 
   def relatedScale: Scale = Major(noteMap(10))
 }
@@ -211,7 +216,7 @@ object Scale {
 
     val m = ru.runtimeMirror(this.getClass.getClassLoader)
 
-    allScaleClasses.filterNot(_.fullName.contains("ScaleByDegrees")).map{c =>
+    allScaleClasses.filterNot(_.fullName.contains("ScaleByDegrees")).map { c =>
       val cm = m.reflectClass(c.asClass)
       val ctor = c.asClass.primaryConstructor.asMethod
       val ctorm = cm.reflectConstructor(ctor)
@@ -238,9 +243,11 @@ object Scale {
       case "Major Pentatonic" => MajorPentatonic(root)
       case _ =>
         val degrees = DegreeParser(scaleName)
-        if (degrees.nonEmpty)
+        if (degrees.nonEmpty) {
           ScaleByDegrees(root, degrees)
-        else Major(root)
+        } else {
+          Major(root)
+        }
     }
   }
 }
