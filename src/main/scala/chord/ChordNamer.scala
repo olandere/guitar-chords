@@ -11,7 +11,7 @@ class ChordNamer(val fl: FretList, val root: Note, val rootVal: Int, val altered
 
  // println(s"fl: $fl, root: $root")
 
-  def SEMI_TO_DEGREE = Map(0 -> 0, 1 -> 2, 2 -> 2, 3 -> 3, 4 -> 3, 5 -> 4,
+  private def SEMI_TO_DEGREE = Map(0 -> 0, 1 -> 2, 2 -> 2, 3 -> 3, 4 -> 3, 5 -> 4,
                            6 -> 5, 7 -> 5, 8 -> 6, 9 -> 6, 10 -> 7, 11 -> 7)
 
   lazy val intervals: FretList = {
@@ -59,8 +59,9 @@ class ChordNamer(val fl: FretList, val root: Note, val rootVal: Int, val altered
   def tryAltRoot: Boolean = alteredRoot.isEmpty && no3rd && hasMajSeven
 
   def apply(): String = {
-    if (isDiminishedSeventh) "dim7"
-    else if (hasMinorThird) {
+    if (isDiminishedSeventh) {
+      "dim7"
+    } else if (hasMinorThird) {
       "m" +
       (if (hasDomSeven)
          if (hasExtensions) {
@@ -179,6 +180,8 @@ class ChordNamer(val fl: FretList, val root: Note, val rootVal: Int, val altered
     alterations +
     suspension + (if (alteredRoot.isDefined) s"/${alteredRoot.get}" else "")
   }
+
+  def chord: Chord = Chord(toString)
 }
 
 object ChordNamer {
