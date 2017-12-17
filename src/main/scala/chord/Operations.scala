@@ -208,7 +208,7 @@ object Operations {
     * @param tuning
     * @return (degrees, name, notes)
     */
-  def chords(chord: String)(implicit tuning: Tuning): (List[String], String, NoteList) = {
+  def chords(chord: String)(implicit tuning: Tuning): (DegreeList, String, NoteList) = {
     def getRoot(fl: FretList, tuning: List[Int]): Int = {
       if (fl.head.isDefined) {
         norm(fl.head.get + tuning.head)
@@ -231,7 +231,8 @@ object Operations {
       //println(ints)
        //, ints.map{_.toList}.flatten)
       //println(s"$namer")
-      (namer.intervals map (_.map(if (namer.isDiminishedSeventh) SEMI_TO_INT + (9 -> Degree("°7")) else SEMI_TO_INT).map(_.toString).getOrElse("x")),
+      //(namer.intervals map (_.map(if (namer.isDiminishedSeventh) SEMI_TO_INT + (9 -> Degree("°7")) else SEMI_TO_INT).map(_.toString).getOrElse("x")),
+      (namer.chord.asDegrees(fl),
         namer.toString,
         notes(Chord(namer.toString))(fl)) //.mkString(" ")
     } else (Nil, chord, Nil)
@@ -327,8 +328,8 @@ object Operations {
     * @param frets
     * @return
     */
-  def notes(chord: Chord)(frets: FretList): NoteList = {
-
+  def notes(chord: Chord)(frets: FretList)(implicit tuning: Tuning): NoteList = {
+   // println(s"notes($chord)($frets)")
     val scale = {
       val sc = if (!chord.isMinor || chord.isPitchClassSet) {
         Major(chord.root)
@@ -396,7 +397,7 @@ object Operations {
     * @return
     */
   def scaleFingering(scaleRoot: Note, semitones: List[Int])(implicit tuning: Tuning): List[List[Int]] = {
-    val scale = Stream.continually(semitones).flatten.scanLeft(0)(_+_).take(12*tuning.numStrings)
+    val scale = Stream.continually(semitones).flatten.scanLeft(0)(_ + _).take(12*tuning.numStrings)
     for {
       root <- tuning.notes
       frets = (scale ++ scale.map(_ + 12)).map {
