@@ -198,7 +198,7 @@ case class Chord(root: Note, triad: String, quality: String, extension: Int,
   }
 
   def asDegrees(a: FretList)(implicit tuning: Tuning): DegreeList = {
-//    println(s"asDegrees($a) tuning: $tuning")
+   // println(s"asDegrees($a) tuning: $tuning")
     val mapping = SEMI_TO_INT ++ semitones.zip(intervals()).toMap ++
       (if (suspension.isDefined) Map(2 -> Degree("2"), 5 -> Degree("4")) else Map.empty)
     val r = a.zip(tuning.semitones).map { case (f, s) => f.map { n => mapping(norm(n + s - retune(tuning)(root)))}
@@ -216,7 +216,7 @@ case class Chord(root: Note, triad: String, quality: String, extension: Int,
 
   def asShell: ShellChord = new ShellChord(this)
 
-  def filterFingerings(fingerings: List[FretList]): List[FretList] = {
+  def filterFingerings(fingerings: List[FretList])(implicit tuning: Tuning): List[FretList] = {
     fingerings
   }
 
@@ -297,7 +297,7 @@ class PitchClassSetChord(val r: String, val s: List[Int]) extends Chord(Note(r),
 
 trait RootPosition {
   this: Chord =>
-  override def filterFingerings(fingerings: List[FretList]): List[FretList] = {
+  override def filterFingerings(fingerings: List[FretList])(implicit tuning: Tuning): List[FretList] = {
     def isInRootPos(f: FretList) = {
       asDegrees(f).dropWhile(_.isEmpty).head.get.value == 0
     }
@@ -307,7 +307,7 @@ trait RootPosition {
 
 trait Drop2 {
   this: Chord =>
-  override def filterFingerings(fingerings: List[FretList]): List[FretList] = {
+  override def filterFingerings(fingerings: List[FretList])(implicit tuning: Tuning): List[FretList] = {
     def isDrop2(frets: FretList) = {
       def consecutiveStrings =
         frets match {
@@ -333,7 +333,7 @@ trait Drop2 {
 
 trait Drop2and4 {
   this: Chord =>
-  override def filterFingerings(fingerings: List[FretList]): List[FretList] = {
+  override def filterFingerings(fingerings: List[FretList])(implicit tuning: Tuning): List[FretList] = {
     def isDrop2and4(frets: FretList) = {
       def skipStrings =
         frets match {
