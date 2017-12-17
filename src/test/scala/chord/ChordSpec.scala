@@ -34,6 +34,10 @@ class ChordSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyCheck
     val fingering = Chord.unapply("x 3 2 2 x 3")
     assert(!C6.asDegrees(fingering).show.split(" ").contains("13"))
     C6.asDegrees(fingering).show.split(" ") should contain("R")
+
+    val Fs7s9 = Chord("F#7#9")
+    val fingering2 = Chord.unapply("24x355")
+    Fs7s9.asDegrees(fingering2).show.split(" ") should contain("♯9")
   }
 
   it should "have the correct degrees with altered tuning" in {

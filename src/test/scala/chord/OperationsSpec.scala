@@ -1,6 +1,7 @@
 package chord
 
 import cats.implicits._
+import cats.syntax.show
 import chord.Operations._
 import org.scalatest._
 
@@ -72,6 +73,13 @@ class OperationsSpec extends FlatSpec with Matchers with Inspectors {
   it should "handle root position filter" in {
     val aM7 = new Chord(Chord("AM7")) with RootPosition
     fingerings(aM7, 4).map{_.show} should contain("x x 7 6 5 4")
+    fingerings(aM7, 4).map{_.show} should contain("5 x 6 6 5 x")
+  }
+
+  it should "handle root position filter with altered tuning" in {
+    implicit val tuning = Tuning.DADGAD
+    val am7 = new Chord(Chord("Am7")) with RootPosition
+    fingerings(am7, 2).map{_.show} should contain("x 0 x 0 3 2")
   }
 
   it should "handle drop2 position filter" in {
@@ -201,7 +209,8 @@ class OperationsSpec extends FlatSpec with Matchers with Inspectors {
   it should "name notes from fingering" in {
     chords("6x776x") should matchPattern { case (_, "A♯M7", _) => }
     chords("097000") should matchPattern { case (_, "Emadd9add11", _) => }
-    chords("x01x12") should matchPattern { case (List("x", "R", "♭5", "x", "♭3", "°7"), "Adim7", _) => }
+    val (deg, name, _) = chords("x01x12")
+    (deg.show, name) should matchPattern { case ("x R ♭5 x ♭3 °7", "Adim7") => }
     chords("xx1212") should matchPattern { case (_, "D♯dim7", List(None, None, Some(Note('D', Sharp)),
     Some(Note('A', Natural)),
     Some(Note('C', Natural)), Some(Note('F', Sharp)))) => }
@@ -217,6 +226,13 @@ class OperationsSpec extends FlatSpec with Matchers with Inspectors {
       )) =>
     }
   }
+
+  it should "name notes from fingering with altered tuning" in {
+    implicit val tuning = Tuning.DADGAD
+    val (deg, name, notes) = chords("7755xx")
+    (deg.show, name, notes.show) should matchPattern { case ("R 5 ♭7 ♭3 x x", "Am7", "A E G C x x") => }
+  }
+
 
   it should "correctly handle InvalidChord" in {
     fingerings(InvalidChord, 4) shouldBe Nil
