@@ -7,7 +7,6 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
   * Created by ericolander on 5/13/17.
   */
 class NoteSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks {
-
   implicit override val generatorDrivenConfig =
     PropertyCheckConfiguration(minSuccessful = 1000)
 
@@ -120,6 +119,10 @@ class NoteSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks
     forAll(NoteGenerator.noteGen, NoteGenerator.noteGen) { (n1, n2) =>
       n1.lower(n2.interval(n1)) shouldBe n2
     }
+  }
+
+  "degrees" should "correctly convert to intervals" in {
+    "1234567".map(c => Degree(c.toString).toInterval) shouldBe "P1 M2 M3 P4 P5 M6 M7".split(" ").map(i => Interval(i)).toList
   }
 
   "accidentals" should "be ordered" in {

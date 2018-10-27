@@ -117,6 +117,10 @@ class ChordNamerSpec extends FlatSpec with Matchers with GeneratorDrivenProperty
     ChordNamer.asAlteredRoot("1x2010").toString shouldBe "C/F"
   }
 
+  it should "use the correct enharmonic name" in {
+    ChordNamer("xx5346").toString shouldBe "E♭"
+  }
+
   ignore should "name random chords" in {
     forAll(chordGen) { (c) =>
       println(s"chord: $c")
