@@ -131,7 +131,7 @@ case class Note(name: Char, accidental: Accidental) {
 case class Degree(value: Int, accidental: Accidental) {
   override def toString: String = s"${accidental}${if (value == 0) "R" else value}"
 
-  def isValid = true
+  def isValid: Boolean = true
 
   def adjust(note: Note): Note =
     accidental.adjust(note)
@@ -156,6 +156,17 @@ case class Degree(value: Int, accidental: Accidental) {
       case _ => s
     }
   }
+
+  def interval(that: Degree): Interval = {
+    if (this == that) Interval("P1") else {
+      val n = norm(this.semitone - that.semitone)
+      val int = ((n + 1) / 2) + 1
+      val q = if (Set(1, 3, 8, 10)(n)) "m" else if (Set(5, 7)(n)) "P" else "M"
+      Interval(s"$q$int")
+    }
+  }
+
+  def toInterval: Interval = interval(Degree("R"))
 
   def next(semitones: Int): Degree = {
     require(semitones > 0 && semitones < 4)
