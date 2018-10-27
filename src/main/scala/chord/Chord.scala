@@ -132,7 +132,7 @@ case class Chord(root: Note, triad: String, quality: String, extension: Int,
   }
 
   lazy val semitones: List[Int] = intervals().map(INT_MAP.withDefault { i =>
-    println(s"i: $i")
+  //  println(s"i: $i")
     if (i.accidental == Flat) {
       -1 + INT_MAP(Degree(i.value, Natural))
     } else if (i.accidental == DoubleFlat || i.accidental == Dim) {
