@@ -133,11 +133,13 @@ class ChordNamer(val fl: FretList, val root: Note, val rootVal: Int, val altered
 
   private def respell: ChordNamer = {
     def getRoot(fl: List[(Option[Int], Int)], chord: FretList, rtInt: Int): Int = {
-      if (chord.head.isDefined && SEMI_TO_DEGREE(chord.head.get) == rtInt) {
-        norm(fl.head._1.get + fl.head._2)
-      } else {
-        getRoot(fl.tail, chord.tail, rtInt)
-      }
+      chord.head.collect {
+        case x if SEMI_TO_DEGREE(x) == rtInt => norm(fl.head._1.get + fl.head._2)
+      }.getOrElse(getRoot(fl.tail, chord.tail, rtInt))
+    }
+
+    def enhName(n: Note): Note = {
+      if (Major(n).isTheoretical) n.enharmonic else n
     }
 
     val newRoot = determineInversion match {
@@ -148,7 +150,7 @@ class ChordNamer(val fl: FretList, val root: Note, val rootVal: Int, val altered
       case _ => 0
     }
     val rootVal = getRoot(fl.zip(tuning.semitones), intervals, newRoot)
-    val root = reverseNoteMap(tuning.root)(rootVal)
+    val root = enhName(reverseNoteMap(tuning.root)(rootVal))
 
    // val ints = intervals(fl, root)
    // println(this)
@@ -191,9 +193,14 @@ object ChordNamer {
   def fretListToIntList(fl: FretList): List[Int] = fl.flatMap{_.toList}.sorted
 
   def getRoot(fl: FretList, tuning: List[Int], tuningRoot: Note): (Note, Int) = {
-    if (fl.head.isDefined) {
-    val rootVal = norm(fl.head.get+tuning.head)
-     (reverseNoteMap(tuningRoot)(rootVal), rootVal) } else getRoot(fl.tail, tuning.tail, tuningRoot)
+    def enhName(n: Note): Note = {
+      if (Major(n).isTheoretical) n.enharmonic else n
+    }
+
+    fl.head.map { root =>
+      val rootVal = norm(root + tuning.head)
+      (enhName(reverseNoteMap(tuningRoot)(rootVal)), rootVal)
+    }.getOrElse(getRoot(fl.tail, tuning.tail, tuningRoot))
   }
 
 //  def intervals(fl: FretList, root: Int) = {
