@@ -340,7 +340,7 @@ object Operations {
     }
 
     def applyAccidental(n: Note, d: Degree, sd: Degree): Note = {
-      println(s"n: $n, d: $d, sd: $sd")
+     // println(s"n: $n, d: $d, sd: $sd")
       sd.adjust(d).adjust(n)
     }
 
