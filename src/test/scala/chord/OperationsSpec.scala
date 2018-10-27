@@ -207,13 +207,14 @@ class OperationsSpec extends FlatSpec with Matchers with Inspectors {
   }
 
   it should "name notes from fingering" in {
-    chords("6x776x") should matchPattern { case (_, "A♯M7", _) => }
+    chords("6x776x") should matchPattern { case (_, "B♭M7", _) => }
     chords("097000") should matchPattern { case (_, "Emadd9add11", _) => }
     val (deg, name, _) = chords("x01x12")
     (deg.show, name) should matchPattern { case ("x R ♭5 x ♭3 °7", "Adim7") => }
-    chords("xx1212") should matchPattern { case (_, "D♯dim7", List(None, None, Some(Note('D', Sharp)),
-    Some(Note('A', Natural)),
-    Some(Note('C', Natural)), Some(Note('F', Sharp)))) => }
+    // shoud this be D#dim instead of Ebdim???
+    chords("xx1212") should matchPattern { case (_, "E♭dim7", List(None, None, Some(Note('E', Flat)),
+    Some(Note('B', DoubleFlat)),
+    Some(Note('D', DoubleFlat)), Some(Note('G', Flat)))) => }
    // val noteList = "E,A,C#,G,B,E".split(",").map(Note.apply).toList
     chords("0 12 11 0 0 0") should matchPattern {
       case (_, _, List(
