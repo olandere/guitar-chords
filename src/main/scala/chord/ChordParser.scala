@@ -19,7 +19,7 @@ trait ChordParser extends RegexParsers {
   val addedNote :Parser[String] = """add|/""".r ~> """[♯#b♭]?9|11|13""".r ^^ {_.toString}
   val suspension: Parser[String] = "sus" ~> """2|4""".r ^^ {_.toString}
   val noThird: Parser[String] = "no3".r ^^ {_.toString}
-  val altRoot : Parser[String] = """/[ABCDEFG][♯#b♭]?""".r ^^ {_.toString.tail}
+  val altRoot : Parser[String] = """/(?i)[ABCDEFG][♯#b♭]?""".r ^^ {_.toString.tail}
 
   val sep:Parser[String] = """,|;|:|\s*""".r
 
