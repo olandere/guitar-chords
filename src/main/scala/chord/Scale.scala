@@ -74,6 +74,8 @@ sealed trait Scale {
     }
     degree.accidental.adjust(note)
   }
+
+  def isTheoretical: Boolean = notes.exists(n => n.accidental == DoubleSharp || n.accidental == DoubleFlat)
 }
 
 case class Major(root: Note) extends Scale {
