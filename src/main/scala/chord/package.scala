@@ -103,8 +103,11 @@ package object chord {
   //converts a space delimited string into a list, eliminating extraneous whitespace
   def delimitedToList(s: String): List[String] = s.trim.split(" ").toList.filter{!_.isEmpty}
 
-  def diff(a: FretList, b: FretList): Int = {
-    val shift = math.max(math.abs(a.max.get - b.filter{v => v.isDefined && v.get > 0}.min.get), math.abs(b.max.get - a.filter{v => v.isDefined && v.get > 0}.min.get))
+  def diff1(a: FretList, b: FretList): Int = {
+    val shift = math.max(
+      math.abs(a.max.get - b.filter{v => v.isDefined && v.get > 0}.min.get),
+      math.abs(b.max.get - a.filter{v => v.isDefined && v.get > 0}.min.get)
+    )
     a.zip(b).map {
       case (None, None) => 0
       case (Some(0), Some(0)) => 0
@@ -117,5 +120,17 @@ package object chord {
       case e =>
         math.abs(e._1.get - e._2.get)
     }.sum + shift
+  }
+
+  def diff(a: FretList, b: FretList): Int = {
+    val shift = 0
+    val s = a.zip(b).map {
+      case (None, None) => 0
+      case (None, Some(x)) => x
+      case (Some(x), None) => x
+      case e =>
+        math.abs(e._1.get - e._2.get)
+    }.distinct.sum //+ shift
+    s + math.abs(s - shift)
   }
 }
