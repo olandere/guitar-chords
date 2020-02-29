@@ -14,5 +14,5 @@ object DegreeGenerator {
   val degreeGen: Gen[Degree] = for {
     r <- dGen
     a <- accidentalGen
-  } yield Degree((a + r.toString).trim())
+  } yield Degree(s"$a$r".trim())
 }

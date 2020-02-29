@@ -2,13 +2,12 @@ package chord
 
 import org.scalatest._
 import cats.implicits._
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalacheck.Gen
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 /**
   * Created by eolander on 1/4/15.
   */
-class ChordSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks {
+class ChordSpec extends FlatSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
   "A chord" should "have correct semitones" in {
     Chord("Gdim7").semitones shouldBe List(0, 3, 6, 9)
