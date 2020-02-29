@@ -1,9 +1,9 @@
 package chord
 
 import org.scalatest.{FlatSpec, Matchers}
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class DegreeParserSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks {
+class DegreeParserSpec extends FlatSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
   implicit override val generatorDrivenConfig =
     PropertyCheckConfiguration(minSuccessful = 50)

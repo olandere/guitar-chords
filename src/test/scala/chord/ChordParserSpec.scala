@@ -25,6 +25,10 @@ class ChordParserSpec extends FlatSpec with Matchers {
     ChordParser("Gadd9add11") should be (List(Chord("Gadd9add11")))
   }
 
+  it should "handle strange chords" in {
+    ChordParser("G♭5♭9") should be (List(Chord("G♭5♭9"))) //5♭9no3
+  }
+
   it should "handle integer notation" in {
     ChordParser("{0 1 4 6 8}").head.toString shouldBe "{0 1 4 6 8}"
   }

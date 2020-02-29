@@ -139,7 +139,9 @@ class ChordNamer(val fl: FretList, val root: Note, val rootVal: Int, val altered
     }
 
     def enhName(n: Note): Note = {
-      if (Major(n).isTheoretical) n.enharmonic else n
+      //todo: need new intervals based on new root to determine whether this is a minor chord
+      val scale = if (hasMinorThird) Aeolian(n) else Major(n)
+      if (scale.isTheoretical) n.enharmonic else n
     }
 
     val newRoot = determineInversion match {

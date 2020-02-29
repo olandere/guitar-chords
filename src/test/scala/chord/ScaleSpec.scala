@@ -2,12 +2,12 @@ package chord
 
 import org.scalatest.{FlatSpec, Matchers}
 import Note._
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 /**
   * Created by ericolander on 7/13/17.
   */
-class ScaleSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks {
+class ScaleSpec extends FlatSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
   implicit override val generatorDrivenConfig =
     PropertyCheckConfiguration(minSuccessful = 50)

@@ -5,12 +5,12 @@ import chord.ChordGenerator.chordGen
 import chord.Operations._
 import org.scalacheck.Shrink
 import org.scalatest._
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 /**
  * Created by eolander on 2/17/15.
  */
-class ChordNamerSpec extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks {
+class ChordNamerSpec extends FlatSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
   implicit override val generatorDrivenConfig =
     PropertyCheckConfiguration(minSuccessful = 50)
