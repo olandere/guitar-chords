@@ -23,8 +23,8 @@ case class Tuning(semitones: List[Int], root: Note) {
 
 object Tuning {
 
-  val StandardTuning = Tuning(List(0, 5, 10, 3, 7, 0), Note("E"))
-  val DADGAD = Tuning("D A D G A D")
+  val StandardTuning: Tuning = Tuning(List(0, 5, 10, 3, 7, 0), Note("E"))
+  val DADGAD: Tuning = Tuning("D A D G A D")
 
   def apply(semitones: List[Int], root: Note): Tuning = {
     new Tuning(semitones, root)

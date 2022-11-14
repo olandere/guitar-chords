@@ -129,7 +129,7 @@ case class Note(name: Char, accidental: Accidental) {
 }
 
 case class Degree(value: Int, accidental: Accidental) {
-  override def toString: String = s"${accidental}${if (value == 0) "R" else value}"
+  override def toString: String = s"$accidental${if (value == 0) "R" else value}"
 
   def isValid: Boolean = true
 
@@ -337,7 +337,7 @@ object InvalidNote extends Note(' ', Natural) {
 
 object Accidental {
   def apply(s: String): Accidental = {
-    if (s.length == 0) {
+    if (s.isEmpty) {
       Natural
     } else {
       s match {

@@ -17,13 +17,13 @@ trait ChordParser extends RegexParsers {
   val ext : Parser[String] = """6|7|9|11|13""".r ^^ {_.toString}
   val alteration:Parser[String] = """[♯#b♭](5|9|11|13)""".r ^^ {_.toString}
   val addedNote :Parser[String] = """add|/""".r ~> """[♯#b♭]?9|11|13""".r ^^ {_.toString}
-  val suspension: Parser[String] = "sus" ~> """2|4""".r ^^ {_.toString}
+  val suspension: Parser[String] = "sus" ~> """[24]""".r ^^ {_.toString}
   val noThird: Parser[String] = "no3".r ^^ {_.toString}
-  val altRoot : Parser[String] = """/(?i)[ABCDEFG][♯#b♭]?""".r ^^ {_.toString.tail}
+  val altRoot : Parser[String] = """/(?i)[ABCDEFG][♯#b♭]?""".r ^^ {_.tail}
 
   val sep:Parser[String] = """,|;|:|\s*""".r
 
-  val pitch:Parser[Int] = """([0-9]|t|e)""".r ^^ {_.toString.charAt(0) match {case 'e' => 11; case 't' => 10; case c => c.asDigit }}
+  val pitch:Parser[Int] = """(\d|t|e)""".r ^^ {_.charAt(0) match {case 'e' => 11; case 't' => 10; case c => c.asDigit }}
 
   val pitchClass:Parser[List[Int]] = "{" ~> pitch.+ <~ "}" ^^ {pc => pc}
 

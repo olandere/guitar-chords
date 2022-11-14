@@ -1,7 +1,6 @@
 package chord
 
 import cats.implicits._
-import cats.syntax.show
 import chord.Operations._
 import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
@@ -26,10 +25,10 @@ class OperationsSpec extends AnyFlatSpec with Matchers with Inspectors {
   }
 
   it should "handle banjo chords" in {
-    implicit val tuning = Tuning("D G B D")
+    implicit val tuning: Tuning = Tuning("D G B D")
     fingerings(Chord("A"), 4).map{_.show} should contain("x 2 2 2")
     fingerings(Chord("E7").asShell, 4).map{_.show} should contain("x 1 3 2")
-    assert(fingerings(Chord("C"), 6, true).map{_.show}.forall(c=>c.exists(_=='x')))  //todo: should have exactly one 'x'
+    assert(fingerings(Chord("C"), 6, jazzVoicing = true).map{_.show}.forall(c=>c.exists(_=='x')))  //todo: should have exactly one 'x'
   }
 
   it should "handle slash chords" in {
@@ -67,7 +66,7 @@ class OperationsSpec extends AnyFlatSpec with Matchers with Inspectors {
   }
 
   it should "chart progressions" in {
-    implicit val tuning = Tuning.StandardTuning
+    implicit val tuning: Tuning = Tuning.StandardTuning
     val p = progression(List(Chord("Em7"), Chord("CM7")), 3)
   //  println(p)
   }
@@ -79,7 +78,7 @@ class OperationsSpec extends AnyFlatSpec with Matchers with Inspectors {
   }
 
   it should "handle root position filter with altered tuning" in {
-    implicit val tuning = Tuning.DADGAD
+    implicit val tuning: Tuning = Tuning.DADGAD
     val am7 = new Chord(Chord("Am7")) with RootPosition
     fingerings(am7, 2).map{_.show} should contain("x 0 x 0 3 2")
   }
@@ -190,13 +189,13 @@ class OperationsSpec extends AnyFlatSpec with Matchers with Inspectors {
   }
 
   it should "handle chords with more tones than strings" in {
-    implicit val tuning = Tuning("G D A E")
+    implicit val tuning: Tuning = Tuning("G D A E")
     val c = Chord("C13")
     assert(fingerings(c, 4).map{f : FretList => c.asDegrees(f)}.forall(_.contains(Some(Degree("13")))))
   }
 
   it should "handle power chords in altered tunings" in {
-    implicit val tuning = Tuning("G D A E")
+    implicit val tuning: Tuning = Tuning("G D A E")
     val a5 = Chord("A5")
     fingerings(a5, 4) should not be empty
     fingerings(a5, 4).map{_.show} should contain("2 2 0 0")
@@ -205,7 +204,7 @@ class OperationsSpec extends AnyFlatSpec with Matchers with Inspectors {
   it should "handle root position chords with shell voicings" in {
     val aM7 = new ShellChord(Chord("AM9")) with RootPosition
     fingerings(aM7, 4).map{_.show} should contain("5 4 6 4 x x")
-    fingerings(aM7, 4).map{_.show} should not contain("4 x 6 6 0 5")
+    fingerings(aM7, 4).map{_.show} should not contain "4 x 6 6 0 5"
   }
 
   it should "name notes from fingering" in {
@@ -230,7 +229,7 @@ class OperationsSpec extends AnyFlatSpec with Matchers with Inspectors {
   }
 
   it should "name notes from fingering with altered tuning" in {
-    implicit val tuning = Tuning.DADGAD
+    implicit val tuning: Tuning = Tuning.DADGAD
     val (deg, name, notes) = chords("7755xx")
     (deg.show, name, notes.show) should matchPattern { case ("R 5 ♭7 ♭3 x x", "Am7", "A E G C x x") => }
   }
@@ -258,25 +257,25 @@ class OperationsSpec extends AnyFlatSpec with Matchers with Inspectors {
 
   it should "name notes for pitch set chords" in {
     val c = Chord("{0 4 6 7}")
-    val f = Operations.fingerings(c, 6, true)
+    val f = Operations.fingerings(c, 6, jazzVoicing = true)
     //println(f.head.show)
     Operations.notes(c)(f.head).show shouldBe "E x x G C F♯"
   }
 
   it should "find open C for mandolin" in {
-    implicit val tuning = Tuning("G D A E")
+    implicit val tuning: Tuning = Tuning("G D A E")
     val c = Chord("C/G")
     fingerings(c).map{_.show} should contain("0 10 10 0")
   }
 
   it should "find G for taro patch tuning" in {
-    implicit val tuning = Tuning("D G D G B D")
+    implicit val tuning: Tuning = Tuning("D G D G B D")
     val g = Chord("G")
     fingerings(g).map{_.show} should contain("0 0 0 0 0 0")
   }
 
   it should "find Dsus4 for DADGAD tuning" in {
-    implicit val tuning = Tuning("D A D G A D")
+    implicit val tuning: Tuning = Tuning("D A D G A D")
     val dsus4 = Chord("Dsus4")
     fingerings(dsus4).map{_.show} should contain("0 0 0 0 0 0")
   }

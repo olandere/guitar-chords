@@ -43,7 +43,7 @@ class ChordSpec extends AnyFlatSpec with Matchers with ScalaCheckDrivenPropertyC
   }
 
   it should "have the correct degrees with altered tuning" in {
-    implicit val tuning = Tuning("D G B D")
+    implicit val tuning: Tuning = Tuning("D G B D")
     val G = Chord("G")
     val fingering = Chord.unapply("x 0 0 0")
     assert(!G.asDegrees(fingering).show.split(" ").contains("13"))
@@ -51,7 +51,7 @@ class ChordSpec extends AnyFlatSpec with Matchers with ScalaCheckDrivenPropertyC
   }
 
   it should "handle slash chords" in {
-    implicit val tuning = Tuning.StandardTuning
+    implicit val tuning: Tuning = Tuning.StandardTuning
     val chord = Chord("A/F")
     chord.altRoot shouldBe Some(Note("F"))
     chord.altRootInterval shouldBe Some(8)
@@ -67,7 +67,7 @@ class ChordSpec extends AnyFlatSpec with Matchers with ScalaCheckDrivenPropertyC
   }
 
   it should "handle power chords" in {
-    implicit val tuning = Tuning.StandardTuning
+    implicit val tuning: Tuning = Tuning.StandardTuning
     val G5 = Chord("G5")
     G5.toString shouldBe "G5"
     G5.semitones shouldBe List(0, 7)
@@ -94,7 +94,7 @@ class ChordSpec extends AnyFlatSpec with Matchers with ScalaCheckDrivenPropertyC
   }
 
   it should "handle banjo chords" in {
-    implicit val tuning = Tuning("D G B D")
+    implicit val tuning: Tuning = Tuning("D G B D")
     val c = Chord("C")
     c.semitones shouldBe List(0, 4, 7)
     val fingering = Chord.unapply("2 0 1 x")
@@ -102,7 +102,7 @@ class ChordSpec extends AnyFlatSpec with Matchers with ScalaCheckDrivenPropertyC
   }
 
   it should "handle frettings" in {
-    implicit val tuning = Tuning.StandardTuning
+    implicit val tuning: Tuning = Tuning.StandardTuning
     val result = List(Some(1), None, Some(2), Some(0), Some(1), None)
     Chord.unapply(" 1 x 2 0 1 x") shouldBe result
     Chord.unapply("1  x 2 0 1 x") shouldBe result
@@ -112,11 +112,10 @@ class ChordSpec extends AnyFlatSpec with Matchers with ScalaCheckDrivenPropertyC
   }
 
   it should "compute diffs" in {
-    implicit val tuning = Tuning.StandardTuning
+    implicit val tuning: Tuning = Tuning.StandardTuning
     val em = Chord.unapply("0 x 0 0 x 7")
     val c7 = Chord.unapply("0 3 x 0 0 x")
     val c = diff(em, c7)
-   // println(c)
   }
 
   it should "handle suspensions" in {
@@ -134,7 +133,6 @@ class ChordSpec extends AnyFlatSpec with Matchers with ScalaCheckDrivenPropertyC
 
 //  it should "handle random chords" in {
 //    forAll(ChordGenerator.chordGen) { (c) =>
-//      println(s"c: $c")
 //      Chord(c).semitones shouldBe List(0, 4, 7)
 //    }
 //  }

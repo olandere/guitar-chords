@@ -53,7 +53,7 @@ case class Chord(root: Note, triad: String, quality: String, extension: Int,
 
   def isPitchClassSet: Boolean = false
 
-  val INT_MAP = Map("1" -> 0, "3" -> 4, "5" -> 7, "6" -> 9, "7" -> 11, "9" -> 2, "11" -> 5, "13" -> 9, "R" -> 0).
+  val INT_MAP: Map[Degree, Int] = Map("1" -> 0, "3" -> 4, "5" -> 7, "6" -> 9, "7" -> 11, "9" -> 2, "11" -> 5, "13" -> 9, "R" -> 0).
     map{case (k, v) => Degree(k) -> v}
 
   def altRootInterval: Option[Int] =
@@ -244,7 +244,7 @@ case class Chord(root: Note, triad: String, quality: String, extension: Int,
 }
 
 object InvalidChord extends Chord(InvalidNote, "", "", 0, "", Nil, None, None) {
-  override lazy val semitones = Nil
+  override lazy val semitones: List[Int] = Nil
   override def intervals(extensions: => List[Degree]): List[Degree] = Nil
   override def isValid: Boolean = false
 }
@@ -425,8 +425,9 @@ object Chord {
   }
 
   def unapply(s: String)(implicit tuning: Tuning): FretList = {
-    if (s.trim.length < tuning.numStrings) Nil
-    else Try(
+    if (s.trim.length < tuning.numStrings) {
+      Nil
+    } else Try(
     (if (s.trim.length == tuning.numStrings) {
       s.trim.toList.map{_.toString}
     } else {delimitedToList(s)})

@@ -3,6 +3,7 @@
 import cats._
 import cats.implicits._
 
+import scala.annotation.tailrec
 import scala.language.implicitConversions
 
 package object chord {
@@ -16,15 +17,19 @@ package object chord {
 
   val mod12 = new util.Modulo(12)
 
-  val listOptFunc = Functor[List].compose[Option]
+  val listOptFunc: Functor[({
+    type λ[α] = List[Option[α]]
+  })#λ] = Functor[List].compose[Option]
 
-  val listOptFold = Foldable[List].compose[Option]
+  val listOptFold: Foldable[({
+    type λ[α] = List[Option[α]]
+  })#λ] = Foldable[List].compose[Option]
 
   implicit val fretListShow: Show[FretList] = Show.show(_.map {_.getOrElse("x")}.mkString(" "))
 
-  implicit val fretListOrder: Order[FretList] = new Order[FretList] {
-    def compare(x: FretList, y: FretList): Int = {
-      def helper(fl1: FretList, fl2: FretList): Int = {
+  implicit val fretListOrder: Order[FretList] = (x: FretList, y: FretList) => {
+    @tailrec
+    def helper(fl1: FretList, fl2: FretList): Int = {
       if (fl1.isEmpty || fl2.isEmpty) {
         0
       } else if (fl1.head.isEmpty) {
@@ -39,8 +44,8 @@ package object chord {
         1
       }
     }
+
     helper(x, y)
-    }
   }
 
   implicit val degreeListShow: Show[DegreeList] = Show.show(_.map {_.getOrElse("x")}.mkString(" "))
@@ -76,10 +81,10 @@ package object chord {
     }
   }
 
-  val SEMI_TO_INT = Map(0 -> "R", 1 -> "♭9", 2 -> "9", 3 -> "♭3", 4 -> "3", 5 -> "11", 6 -> "♭5", 7 -> "5", 8 -> "♯5",
+  val SEMI_TO_INT: Map[Int, Degree] = Map(0 -> "R", 1 -> "♭9", 2 -> "9", 3 -> "♭3", 4 -> "3", 5 -> "11", 6 -> "♭5", 7 -> "5", 8 -> "♯5",
                         9 -> "13", 10 -> "♭7", 11 -> "7").map{case(k, v) => k -> Degree(v)}
 
-  implicit val tuning = Tuning.StandardTuning
+  implicit val tuning: Tuning = Tuning.StandardTuning
 
   def retune(tuning: Tuning): Map[Note, Int] = {
     val newmap = NOTE_MAP.map { e => (e._1, norm(e._2 - NOTE_MAP(tuning.root))) }
@@ -101,7 +106,7 @@ package object chord {
   def norm(x: Int, b: Int = 12): Int = new util.Modulo(b)(x)
 
   //converts a space delimited string into a list, eliminating extraneous whitespace
-  def delimitedToList(s: String): List[String] = s.trim.split(" ").toList.filter{!_.isEmpty}
+  def delimitedToList(s: String): List[String] = s.trim.split(" ").toList.filter{_.nonEmpty}
 
   def diff1(a: FretList, b: FretList): Int = {
     val shift = math.max(

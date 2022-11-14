@@ -24,7 +24,7 @@ class ChordNamer(val fl: FretList, val root: Note, val rootVal: Int, val altered
 
   private def hasSharpNine = hasMinorThird && hasMajorThird
 
-  private def no3rd = !(hasMinorThird || hasMajorThird)
+  private def no3rd: Boolean = !(hasMinorThird || hasMajorThird)
 
   private def hasDomSeven = intervals.contains(Some(10))
 
@@ -107,7 +107,7 @@ class ChordNamer(val fl: FretList, val root: Note, val rootVal: Int, val altered
     if (!has7) {
       (if (has13 && !isDiminishedSeventh) {if (!has7) "6" else "13"} else "") +
       (if (has9 && !no3rd) "add9" else "") +
-      (if (has11 && !no3rd && !alteredRoot.exists(_ == Major(root).noteFromDegree(Degree("4")))) "add11" else "")
+      (if (has11 && !no3rd && !alteredRoot.contains(Major(root).noteFromDegree(Degree("4")))) "add11" else "")
     } else ""
   }
 

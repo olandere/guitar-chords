@@ -16,7 +16,7 @@ trait TuningParser extends RegexParsers {
     }
 
   val fret: Parser[Int] =
-    """[1]?[0-9]""".r ^^ {
+    """1?\d""".r ^^ {
       _.toInt
     }
 

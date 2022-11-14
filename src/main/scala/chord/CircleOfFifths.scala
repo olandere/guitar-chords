@@ -8,19 +8,19 @@ object CircleOfFifths {
   val flatKeys: Seq[Note] = flats.tail.takeWhile(k => k == "F" || k.contains("b")).take(7).map(Note.apply).toSeq
   private val allNotes = (CircleOfFifths.flats.reverse ++ CircleOfFifths.sharps).distinct.map(Note.apply)
 
-  def fifths(n: Note): Stream[Note] = n #:: fifths(n.raise(Interval("P5")))
+  def fifths(n: Note): LazyList[Note] = n #:: fifths(n.raise(Interval("P5")))
 
   //private val allNotes =
 
-  val mapping = {
+  val mapping: PartialFunction[Note, Note] = {
     val m = allNotes.toList.drop(12).zip(allNotes.toList)
     m.toMap.orElse(m.map(_.swap).toMap)
   }
 
   private val majScale = List(0, 2, 4, -1, 1, 3, 5)
-  val majScaleDegrees = List("R", "2", "3", "4", "5", "6", "7").map(Degree.apply)
+  val majScaleDegrees: Seq[Degree] = List("R", "2", "3", "4", "5", "6", "7").map(Degree.apply)
   private val minScale = List(0, 2, -3, -1, 1, -4, -2) // R 2 b3 4 5 b6 b7
-  val minScaleDegrees = List("R", "2", "b3", "4", "5", "b6", "b7").map(Degree.apply)
+  val minScaleDegrees: Seq[Degree] = List("R", "2", "b3", "4", "5", "b6", "b7").map(Degree.apply)
 
   def relativeMinor(key: String): String = sharps(sharps.indexOf(key) + 3)
 

@@ -6,13 +6,13 @@ import scala.util.parsing.combinator.RegexParsers
 
 trait DegreeParser extends RegexParsers with Logging {
 
-  val accidental = """[♯#b♭°]""".r ^^ {a => a}
+  val accidental: Parser[String] = """[♯#b♭°]""".r ^^ { a => a}
 
-  val deg = """[1]?[13]|[R12345679]""".r ^^ { d=>
+  val deg: Parser[Int] = """1?[13]|[R12345679]""".r ^^ { d=>
     if (d == "R" || d == "1") 0 else d.toInt
   }
 
-  val degree = accidental.? ~ deg ^^ {
+  val degree: Parser[Degree] = accidental.? ~ deg ^^ {
     case a~d => Degree(d, a.map{Accidental(_)}.getOrElse(Natural))
   }
   val sep:Parser[String] = """,|;|:|\s*""".r

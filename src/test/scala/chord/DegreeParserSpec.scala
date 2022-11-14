@@ -6,11 +6,11 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 class DegreeParserSpec extends AnyFlatSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
-  implicit override val generatorDrivenConfig =
+  implicit override val generatorDrivenConfig: PropertyCheckConfiguration =
     PropertyCheckConfiguration(minSuccessful = 50)
 
   "DegreeParser" should "parse Degree objects" in {
-    forAll(DegreeGenerator.degreeGen) { (n) =>
+    forAll(DegreeGenerator.degreeGen) { n =>
       DegreeParser(n.toString).head shouldBe n
     }
   }

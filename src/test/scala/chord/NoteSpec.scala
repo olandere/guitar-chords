@@ -8,17 +8,17 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
   * Created by ericolander on 5/13/17.
   */
 class NoteSpec extends AnyFlatSpec with Matchers with ScalaCheckDrivenPropertyChecks {
-  implicit override val generatorDrivenConfig =
+  implicit override val generatorDrivenConfig: PropertyCheckConfiguration =
     PropertyCheckConfiguration(minSuccessful = 1000)
 
   it should "create notes" in {
-    forAll(NoteGenerator.noteGen) { (n) =>
+    forAll(NoteGenerator.noteGen) { n =>
   //    println(s"note: $n")
     }
   }
 
   it should "correctly handle enharmonic names" in {
-    forAll(NoteGenerator.noteGen.filter(n => !Set("C♭", "B♯", "F♭", "E♯").contains(n.toString))) { (n) =>
+    forAll(NoteGenerator.noteGen.filter(n => !Set("C♭", "B♯", "F♭", "E♯").contains(n.toString))) { n =>
      // println(s"note: $n")
       n.enharmonic.enharmonic shouldBe n
     }

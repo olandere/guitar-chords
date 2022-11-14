@@ -40,7 +40,7 @@ case object Minor extends Quality {
 
   override def toString: String = "m"
 
-  override val semitoneAdjustment = -1
+  override val semitoneAdjustment: Int = -1
 }
 
 case object Augmented extends Quality {
@@ -72,7 +72,7 @@ case object Diminished extends Quality {
 
   override def toString: String = "d"
 
-  override val semitoneAdjustment = -2
+  override val semitoneAdjustment: Int = -2
 }
 
 case object DoublyDiminished extends Quality {
@@ -80,7 +80,7 @@ case object DoublyDiminished extends Quality {
 
   override def toString: String = "dd"
 
-  override val semitoneAdjustment = -3
+  override val semitoneAdjustment: Int = -3
 }
 
 case object TripleDiminished extends Quality {
@@ -88,7 +88,7 @@ case object TripleDiminished extends Quality {
 
   override def toString: String = "ddd"
 
-  override val semitoneAdjustment = -4
+  override val semitoneAdjustment: Int = -4
 }
 
 case object Perfect extends Quality {
@@ -148,11 +148,11 @@ object Interval {
 object InvalidInterval extends Interval(InvalidQuality, 1) {}
 
 object IntervalParser extends RegexParsers with Logging {
-  val perfect = "P" ~> """1|4|5""".r ^^ {n => new Interval(Perfect, n.toInt)}
-  val majMin = """m|M""".r ~ """2|3|6|7""".r ^^ {case q~n => new Interval(Quality(q), n.toInt)}
-  val augDim = """d{1,3}|A{1,3}""".r ~ """[1-8]""".r ^^ {case q~n => new Interval(Quality(q), n.toInt)}
+  val perfect: IntervalParser.Parser[Interval] = "P" ~> """[145]""".r ^^ { n => new Interval(Perfect, n.toInt)}
+  val majMin: IntervalParser.Parser[Interval] = """[mM]""".r ~ """[2367]""".r ^^ {case q~n => new Interval(Quality(q), n.toInt)}
+  val augDim: IntervalParser.Parser[Interval] = """d{1,3}|A{1,3}""".r ~ """[1-8]""".r ^^ {case q~n => new Interval(Quality(q), n.toInt)}
 
-  val interval = perfect | majMin | augDim
+  val interval: IntervalParser.Parser[Interval] = perfect | majMin | augDim
 
   def apply(input: String): Interval = {
     parseAll(interval, input) match {

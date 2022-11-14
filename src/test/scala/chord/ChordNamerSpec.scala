@@ -14,14 +14,14 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
  */
 class ChordNamerSpec extends AnyFlatSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
-  implicit override val generatorDrivenConfig =
+  implicit override val generatorDrivenConfig: PropertyCheckConfiguration =
     PropertyCheckConfiguration(minSuccessful = 50)
 
-  implicit val stringNoShrink = Shrink[String] {
+  implicit val stringNoShrink: Shrink[String] = Shrink[String] {
     _ => Stream.empty
   }
 
-  implicit val chordNoShrink = Shrink[Chord] {
+  implicit val chordNoShrink: Shrink[Chord] = Shrink[Chord] {
     _ => Stream.empty
   }
 
@@ -82,17 +82,17 @@ class ChordNamerSpec extends AnyFlatSpec with Matchers with ScalaCheckDrivenProp
   }
 
   it should "name chords in altered tunings" in {
-    implicit val tuning = Tuning("D A D G A D")
+    implicit val tuning: Tuning = Tuning("D A D G A D")
     ChordNamer("2 2 2 0 2 2").toString shouldBe "Em"
   }
 
   it should "name chords in altered tunings with accidentals" in {
-    implicit val tuning = Tuning("C# G# C# G# C# E")
+    implicit val tuning: Tuning = Tuning("C# G# C# G# C# E")
     ChordNamer("xx3004").toString shouldBe "C♯m"
   }
 
   it should "name unusual chords in ukulele tuning" in {
-    implicit val tuning = TuningParser("GCEA")
+    implicit val tuning: Tuning = TuningParser("GCEA")
     ChordNamer("2 0 2 3").toString shouldBe "F♯dim"
   }
 
@@ -124,7 +124,7 @@ class ChordNamerSpec extends AnyFlatSpec with Matchers with ScalaCheckDrivenProp
   }
 
   ignore should "name random chords" in {
-    forAll(chordGen) { (c) =>
+    forAll(chordGen) { c =>
       println(s"chord: $c")
     //  t._2.toString shouldBe t._1
     //  val chord = Chord(c)

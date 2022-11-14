@@ -165,6 +165,7 @@ object Operations {
   }
 
   def combine(c1: FretList, c2: FretList): Option[FretList] = {
+    @tailrec
     def helper(c1: FretList, c2: FretList, acc: FretList): Option[FretList] = {
       if (c1.isEmpty) {
         Some(acc)
@@ -187,6 +188,7 @@ object Operations {
   }
 
   def condense(chords: List[FretList], fretSpan: Int): List[FretList] = {
+    @tailrec
     def helper(chords: List[FretList], chord: FretList, acc: List[FretList]): List[FretList] = {
       if (chords.isEmpty) {
         acc :+ chord
@@ -210,6 +212,7 @@ object Operations {
     * @return (degrees, name, notes)
     */
   def chords(chord: String)(implicit tuning: Tuning): (DegreeList, String, NoteList) = {
+    @tailrec
     def getRoot(fl: FretList, tuning: List[Int]): Int = {
       if (fl.head.isDefined) {
         norm(fl.head.get + tuning.head)
@@ -399,7 +402,7 @@ object Operations {
     * @return
     */
   def scaleFingering(scaleRoot: Note, semitones: List[Int])(implicit tuning: Tuning): List[List[Int]] = {
-    val scale = Stream.continually(semitones).flatten.scanLeft(0)(_ + _).take(12*tuning.numStrings)
+    val scale = LazyList.continually(semitones).flatten.scanLeft(0)(_ + _).take(12*tuning.numStrings)
     for {
       root <- tuning.notes
       frets = (scale ++ scale.map(_ + 12)).map {

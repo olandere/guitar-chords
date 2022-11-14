@@ -10,7 +10,7 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
   */
 class ScaleSpec extends AnyFlatSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
-  implicit override val generatorDrivenConfig =
+  implicit override val generatorDrivenConfig: PropertyCheckConfiguration =
     PropertyCheckConfiguration(minSuccessful = 50)
 
   "Scale" should "" in {
@@ -82,12 +82,13 @@ class ScaleSpec extends AnyFlatSpec with Matchers with ScalaCheckDrivenPropertyC
   }
 
   it should "validate random scales have the correct number of notes" in {
-    forAll(ScaleGenerator.scaleGen) { (s) =>
+    forAll(ScaleGenerator.scaleGen) { s =>
       val noteSet = s.notes.map(_.name).toSet
-      if (s.name.contains("Pentatonic"))
+      if (s.name.contains("Pentatonic")) {
         noteSet.size shouldBe 5
-      else
+      } else {
         noteSet.size shouldBe 7
+      }
     }
   }
 

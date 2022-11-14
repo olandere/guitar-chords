@@ -10,7 +10,7 @@ settings(
   Test / parallelExecution := false,
 
   libraryDependencies ++= Seq(
-    "ch.qos.logback" % "logback-classic" % "1.3.4" % "runtime",
+    "ch.qos.logback" % "logback-classic" % "1.4.4" % "runtime",
     "org.clapper" %% "grizzled-slf4j" % "1.3.4",
     "org.scalatest" %% "scalatest" % "3.2.14" % "test",
     "org.scalacheck" %% "scalacheck" % "1.17.0" % "test",
