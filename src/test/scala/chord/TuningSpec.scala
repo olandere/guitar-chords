@@ -1,11 +1,12 @@
 package chord
 
-import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 /**
   * Created by eolander on 2/25/15.
   */
-class TuningSpec extends FlatSpec with Matchers {
+class TuningSpec extends AnyFlatSpec with Matchers {
 
   "A tuning" should "not case about case" in {
     val t = Tuning("a b c d e")

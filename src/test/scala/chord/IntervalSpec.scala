@@ -1,8 +1,9 @@
 package chord
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class IntervalSpec extends FlatSpec with Matchers {
+class IntervalSpec extends AnyFlatSpec with Matchers {
 
   "An interval" should "be invertable" in {
     Interval("m3").invert shouldBe Interval("M6")

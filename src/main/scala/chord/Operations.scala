@@ -25,7 +25,7 @@ object Operations {
         Some(_)
       } ++ List(None),
         tuning.numStrings - essential.length).map { l => l ++ semitones.filterNot(n => optional.contains(n.get)) }
-        .flatMap(_.permutations).toIterator
+        .flatMap(_.permutations).iterator
     }
     else semitones.padTo(tuning.numStrings, None).permutations
   }
@@ -134,11 +134,12 @@ object Operations {
       if (c.isEmpty) {
         false
       } else {
-        if (c.head.isDefined) {
-          c.head.get == 0
-        } else {
-          rootPosition(c.tail)
-        }
+        c.head.fold(rootPosition(c.tail))(_ == 0)
+//        if (c.head.isDefined) {
+//          c.head.get == 0
+//        } else {
+//          rootPosition(c.tail)
+//        }
       }
 
     //    chord.semitones
@@ -147,7 +148,7 @@ object Operations {
     //    .permutations  //.filter(rootPosition)
     // generatePermutations.foreach(c => println(c))
     chord.filterFingerings({
-      val r = generatePermutations(chord, !jazzVoicing).toSet.filter(alteredRoot)
+      val r = generatePermutations(chord, !jazzVoicing).toSet.filter(alteredRoot)//.map{p => println(p.show);p}
         .map(_.zip(tuning.semitones)).map {
         _.map { a: (Option[Int], Int) => a._1.map { x => norm(x - a._2) } }
       }.toList
@@ -319,6 +320,7 @@ object Operations {
     }
 
     require(length >= 0, s"length: $length")
+    println(s"input $input, length: $length")
     helper(input, Nil, length)
   }
 

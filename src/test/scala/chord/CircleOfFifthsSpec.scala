@@ -1,9 +1,10 @@
 package chord
 
-import org.scalatest._
 import CircleOfFifths._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class CircleOfFifthsSpec extends FlatSpec with Matchers {
+class CircleOfFifthsSpec extends AnyFlatSpec with Matchers {
 
   "CircleOfFifths" should "find relative minor key" in {
     relativeMinor("C") shouldBe "A"

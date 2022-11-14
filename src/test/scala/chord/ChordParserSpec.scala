@@ -1,11 +1,12 @@
 package chord
 
-import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 /**
   * Created by eolander on 4/23/16.
   */
-class ChordParserSpec extends FlatSpec with Matchers {
+class ChordParserSpec extends AnyFlatSpec with Matchers {
   import chord._
 
   "ChordParser" should "recognize power chords" in {

@@ -1,11 +1,12 @@
 package chord
 
-import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 /**
   * Created by eolander on 4/23/16.
   */
-class TuningParserSpec extends FlatSpec with Matchers {
+class TuningParserSpec extends AnyFlatSpec with Matchers {
 
   "The tuning parser" should "not care about spacing" in {
     TuningParser("D A D G A D") shouldBe Tuning.DADGAD

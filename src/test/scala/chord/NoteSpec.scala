@@ -1,12 +1,13 @@
 package chord
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 /**
   * Created by ericolander on 5/13/17.
   */
-class NoteSpec extends FlatSpec with Matchers with ScalaCheckDrivenPropertyChecks {
+class NoteSpec extends AnyFlatSpec with Matchers with ScalaCheckDrivenPropertyChecks {
   implicit override val generatorDrivenConfig =
     PropertyCheckConfiguration(minSuccessful = 1000)
 

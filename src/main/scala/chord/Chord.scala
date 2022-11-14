@@ -28,17 +28,20 @@ case class Chord(root: Note, triad: String, quality: String, extension: Int,
     } yield mod(n - r)).grouped(semitones.length).toList.map{_.sorted}
   }
 
+  def canEqual(a: Any): Boolean = a.isInstanceOf[Chord]
+
   override def equals(obj: scala.Any): Boolean =
     obj match {
 //      case that: Chord => root.enhEquals(that.root) && triad == that.triad && quality == that.quality &&
 //        extension == that.extension && alteration == that.alteration && added == that.added &&
 //        suspension == that.suspension && altRoot == that.altRoot
       case that: Chord =>
+        this.canEqual(that) && (
         if (root.enhEquals(that.root))
           semitones == that.semitones
         else if (isAug && that.isAug) {
           Set(Interval("M3"), Interval("m6"), Interval("A5"), Interval("d4")).contains(root.interval(that.root))
-        } else false
+        } else false)
       case _ => false
     }
 

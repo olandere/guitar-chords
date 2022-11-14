@@ -4,11 +4,13 @@ import cats.implicits._
 import cats.syntax.show
 import chord.Operations._
 import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 /**
  * Created by eolander on 12/28/14.
  */
-class OperationsSpec extends FlatSpec with Matchers with Inspectors {
+class OperationsSpec extends AnyFlatSpec with Matchers with Inspectors {
 
   "Fingerings" should "generate known fingerings" in
     {
@@ -103,7 +105,7 @@ class OperationsSpec extends FlatSpec with Matchers with Inspectors {
   }
 
   it should "handle drop2and4 position filter" in {
-    println("handle drop2and4 position filter")
+    //println("handle drop2and4 position filter")
     val dbM7 = new Chord(Chord("DbM7")) with Drop2and4
     fingerings(dbM7, 5).map{_.show} should contain("4 4 x 5 6 x")
    // println("DbM7")
@@ -257,7 +259,25 @@ class OperationsSpec extends FlatSpec with Matchers with Inspectors {
   it should "name notes for pitch set chords" in {
     val c = Chord("{0 4 6 7}")
     val f = Operations.fingerings(c, 6, true)
-    println(f.head.show)
+    //println(f.head.show)
     Operations.notes(c)(f.head).show shouldBe "E x x G C F♯"
+  }
+
+  it should "find open C for mandolin" in {
+    implicit val tuning = Tuning("G D A E")
+    val c = Chord("C/G")
+    fingerings(c).map{_.show} should contain("0 10 10 0")
+  }
+
+  it should "find G for taro patch tuning" in {
+    implicit val tuning = Tuning("D G D G B D")
+    val g = Chord("G")
+    fingerings(g).map{_.show} should contain("0 0 0 0 0 0")
+  }
+
+  it should "find Dsus4 for DADGAD tuning" in {
+    implicit val tuning = Tuning("D A D G A D")
+    val dsus4 = Chord("Dsus4")
+    fingerings(dsus4).map{_.show} should contain("0 0 0 0 0 0")
   }
 }
